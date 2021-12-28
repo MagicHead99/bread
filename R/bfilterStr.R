@@ -1,27 +1,32 @@
-bfilterStr <- function(file = NULL, 
-                       patterns = NULL, 
-                       filtered_columns = NULL, 
+#' Internal helper function generating the grep Command String
+#'
+#' Writes a string containing a grep call from the function parameters
+#'
+#' @param file String. Required. Full path to a file
+#' @param patterns String or vector of strings. Required. One or several patterns used to filter the data from the input file. Each element of the vector should correspond to the column to be filtered. Can use regular expressions.
+#' @param filtered_columns String, numeric or vector of strings or numeric. Optional. The columns to be filtered should be indicated through their names or their index number. Each element of the vector should correspond to the pattern with which it will be filtered.
+#' @param meta_output List. Optional. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.
+#' @keywords filter grep
+#' @examples
+#' bfilterStr(file = "./data/test.csv", patterns = c("2002", "red"), filtered_columns = c("YEAR", "COLOR"))
+
+
+bfilterStr <- function(file = NULL,
+                       patterns = NULL,
+                       filtered_columns = NULL,
                        meta_output = NULL){
-  # filter avant de charger en memoire
-  # on definit un pattern de filtre qui passera sur tout le fichier
-  # on definit (de preference mais optionnel) les colonnes qui doivent etre filtrees
-  # filtered_columns accepte les vecteurs de noms ou d'index (ex: c(1,3) ou c("SIREN", "DATE"))
-  # s'il y en a plusieurs, on doit faire correspondre les vecteurs patterns et filtered_columns
-  # dans ce cas il y a une 2nde passe avec dplyr::filter pour supprimer les faux positifs
-  # si on veut match plusieurs patterns pour une colonne on utilise "|" par exemple:
-  # patterns = c("51602913", "2019|2020"), filtered_columns = c("SIREN", "DATE"))
-  # on aura 1 seul SIREN et les dates 2019 et 2020 en mémoire
+
   if(length(patterns) != length(filtered_columns)){
-    stop('\n *** patterns must correspond to the filtered_columns (vectors of \n 
+    stop('\n *** patterns must correspond to the filtered_columns (vectors of \n
     same length). If several values must be matched in some of the columns\n
     please use regexp "or" = "|" ***')
   }
-  
+
   if(is.null(meta_output)){
     meta_output = bmeta(file)
   }
-  
-  
+
+
   filterStr <- paste(patterns, collapse = "|")
   unixCmdStr <- paste0('grep -aEu "', filterStr, '" ')
   return(unixCmdStr)
