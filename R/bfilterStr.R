@@ -16,7 +16,7 @@ bfilterStr <- function(file = NULL,
                        filtered_columns = NULL,
                        meta_output = NULL){
 
-  if(length(patterns) != length(filtered_columns)){
+  if((length(patterns) != length(filtered_columns)) & !is.null(filtered_columns)){
     stop('\n *** patterns must correspond to the filtered_columns (vectors of \n
     same length). If several values must be matched in some of the columns\n
     please use regexp "or" = "|" ***')

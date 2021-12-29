@@ -121,10 +121,11 @@ bfile_split <- function(file = NULL,
 
     for(ii in 1:nfiles){
       patt = as.character(unique(columns_to_split[,1])[ii])
+      patt_escaped <- escape_special_characters(patt)
       print(paste0("Generating file ", ii, " of ",
                    nfiles, " : ", paste0(base_file, "_", patt, ".csv")))
       df_temp <- bfilter(file = file,
-                         patterns = patt,
+                         patterns = patt_escaped,
                          filtered_columns = colnums[1],
                          meta_output = meta_output,
                          sep = sep, dec = dec)

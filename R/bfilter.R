@@ -5,15 +5,19 @@
 #' @param file String. Required. Full path to a file compatible with data.table::fread()
 #' @param patterns String or vector of strings. Required. One or several patterns used to filter the data from the input file. Each element of the vector should correspond to the column to be filtered. Can use regular expressions.
 #' @param filtered_columns String, numeric or vector of strings or numeric. Optional. The columns to be filtered should be indicated through their names or their index number. Each element of the vector should correspond to the pattern with which it will be filtered.
+#' @param fixed logical. If TRUE, pattern is a string to be matched as is. Overrides all conflicting arguments.
 #' @param meta_output List. Optional. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.
 #' @keywords filter grep
 #' @examples
-#' bfilterStr(file = "./data/test.csv", patterns = c("2002", "red"), filtered_columns = c("YEAR", "COLOR"))
+#' bfilter(file = "./data/test.csv", patterns = c("200[0-9]", "red"), filtered_columns = c("YEAR", "COLOR"))
+#' bfilter(file = "./data/test.csv", patterns = "orange (purple)", filtered_columns = "COLOR", fixed = FALSE) # if T, bug
+#' bfilter(file = "./data/test.csv", patterns = "2002", fixed = F) # False positive because no column provided
 
 
 bfilter <- function(file = NULL,
                     patterns = NULL,
                     filtered_columns = NULL,
+                    fixed = FALSE,
                     meta_output = NULL,
                     sep = ";", dec = ","){
 
@@ -28,6 +32,10 @@ bfilter <- function(file = NULL,
   # on aura 1 seul SIREN et les dates 2019 et 2020 en mémoire
   if(is.null(meta_output)){
     meta_output = bmeta(file)
+  }
+
+  if(fixed == T){
+    patterns <- escape_special_characters(patterns)
   }
 
   unixCmdStr <- bfilterStr(file = file, patterns = patterns, filtered_columns = filtered_columns, meta_output = meta_output) %>%
