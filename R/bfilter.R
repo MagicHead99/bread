@@ -26,7 +26,9 @@ bfilter <- function(file = NULL,
   # si on veut match plusieurs patterns pour une colonne on utilise "|" par exemple:
   # patterns = c("51602913", "2019|2020"), filtered_columns = c("SIREN", "DATE"))
   # on aura 1 seul SIREN et les dates 2019 et 2020 en mémoire
-
+  if(is.null(meta_output)){
+    meta_output = bmeta(file)
+  }
 
   unixCmdStr <- bfilterStr(file = file, patterns = patterns, filtered_columns = filtered_columns, meta_output = meta_output) %>%
     paste(file)
