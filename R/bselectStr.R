@@ -1,18 +1,18 @@
-bselectStr <- function(file = NULL, 
-                       colnames = NULL, colnums = NULL, 
-                       meta_output = NULL, 
+bselectStr <- function(file = NULL,
+                       colnames = NULL, colnums = NULL,
+                       meta_output = NULL,
                        sep = ";"){
   if(is.null(meta_output)){
     meta_output = bmeta(file)
   }
-  
+
   ## Case1: colnums provided but not colnames
   if(is.null(colnames)){
     if(!is.null(colnums)){
       colnumStr <- paste(colnums, collapse = ",")
     }
     ## Case2: neither colnums nor colnames provided
-    else { 
+    else {
       stop("*** One of colnames OR colnums needed ! ***")
     }
     ## Case3: both colnums and colnames provided
