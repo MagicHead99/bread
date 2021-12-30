@@ -21,7 +21,14 @@
 #'
 #' @examples
 #' ## Filtering on 2 columns, using regex.
-#' bfilter(file = "./data/test.csv", patterns = c("200[0-9]", "red"), filtered_columns = c("YEAR", "COLOR"), sep = ";")
+#' bfile_split(file = "./data/test.csv", by_nrows = 5)
+#' bfile_split(file = "./data/test.csv", by_nfiles = 3)
+#' bfile_split(file = "./data/test.csv", by_columns = c("YEAR", "COLOR"))
+#' ## For very big files with several million rows, the bmeta() function takes a long time to count the rows
+#' ## without loading the file in memory. Best practice is to save the result of bmeta() in a variable and provide it
+#' ## to bfile_split()
+#' meta <- bmeta(file = "./data/test.csv")
+#' bfile_split(file = "./data/test.csv", by_nrows = 5, meta_output = meta)
 #' @export
 
 bfile_split <- function(file = NULL,

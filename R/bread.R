@@ -45,6 +45,11 @@
 #' bread(file = "./data/test.csv", colnums = c(1,3))
 #' bread(file = "./data/test.csv", colnames = c("YEAR", "PRICE"), patterns = 2002, filtered_columns = "YEAR")
 #' bread(file = "./data/test.csv", colnames = c("YEAR", "COLOR"), patterns = "red", filtered_columns = "COLOR", first_row = 10, last_row = 18)
+#' ## For very big files with several million rows, the bmeta() function takes a long time to count the rows
+#' ## without loading the file in memory. Best practice is to save the result of bmeta() in a variable and provide it
+#' ## to bread()
+#' meta <- bmeta(file = "./data/test.csv")
+#' bread(file = "./data/test.csv", colnums = c(1,3), meta_output = meta)
 #' @export
 
 bread <- function(file = NULL,
