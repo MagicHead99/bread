@@ -1,23 +1,65 @@
-##### TO DO:
-##### function(,...)
-##### args = list(...)
-##### remove sep and dec
-##### args = c(cmd = unixCmdStr, args) # à tester
-##### do.call(fread, args)
-
-
+#' Reads a file in table format, selecting columns, subsetting rows by number and filtering them by pattern
+#'
+#' Wrapper for data.table::fread() simplifying the use of Unix commands like grep, cut and sed
+#' on a data file *before* loading it in memory. The Unix commands are automatically generated
+#' from the arguments.
+#' This is useful if you want to load a big file too large for your available memory
+#' (and encounter the "cannot allocate vector of size" error) and know you can work on a
+#' subsample. "b" stands for "big file".
+#' This function allows to subset rows by their index number, select columns and filter with a pattern.
+#'
+#' @section Warning:
+#' Best practice would probably be to load the big file in a SQL database or something.
+#' Or not working on huge CSV files in the first place.
+#' But if you have to, you hopefully won't have to delve into the fascinating grammar of
+#' Unix commands.
+#'
+#' @section Arguments:
+#' You can mix and match the row subsetting, the filtering and the selecting of columns.
+#' In order, the function:
+#' 1. subsets the rows by their numbers (with sed). You need to input the index
+#' number of the first and last rows you want to load in memory with fread(),
+#' or alternatively use either the head or tail arguments to subset the first or
+#' last rows of the file.
+#' 2. selects columns by index number or name (with cut). If both colnames and
+#' colnums are provided, colnums will be prefered.
+#' 3. filters the data selected so far with a pattern by column (with grep). The
+#' columns to be filtered should be indicated through their names or their index
+#' number. Each element of the vector should correspond to the pattern with which
+#' it will be filtered.
+#'
+#' @param first_row Numeric. First row of the portion of the file to subset.
+#' @param last_row Numeric. Last row of the portion of the file to subset.
+#' @param head Numeric. How many rows starting from the first in the file.
+#' @param tail Numeric. How many rows starting from the last in the file.
+#' @param colnames Vector of strings. Exact names of columns to select. If both colnames and colnums are provided, colnums will be prefered.
+#' @param colnums Vector of numeric. Columns index numbers.
+#' @param patterns Vector of strings. One or several patterns used to filter the data from the input file. Each element of the vector should correspond to the column to be filtered. Can use regular expressions.
+#' @param filtered_columns Vector of strings or numeric. Optional. The columns to be filtered should be indicated through their names or their index number. Each element of the vector should correspond to the pattern with which it will be filtered.
+#' @param fixed Logical. If TRUE, pattern is a string to be matched as is. Overrides all conflicting arguments.
+#' @param meta_output List. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.
+#' @param ... Arguments that must be passed to data.table::fread() like "sep" or "dec".
+#' @keywords big file select cut allocate vector size
+#' @return A data frame with the selected columns and the subsetted and filtered data
+#' @examples
+#' bread(file = "./data/test.csv", colnums = c(1,3))
+#' bread(file = "./data/test.csv", colnames = c("YEAR", "PRICE"), patterns = 2002, filtered_columns = "YEAR")
+#' bread(file = "./data/test.csv", colnames = c("YEAR", "COLOR"), patterns = "red", filtered_columns = "COLOR", first_row = 10, last_row = 18)
+#' @export
 
 bread <- function(file = NULL,
                   first_row = NULL, last_row = NULL,
                   head = NULL, tail = NULL,
                   colnames = NULL, colnums = NULL,
-                  patterns = NULL, filtered_columns = NULL,
-                  sep = ";", dec = ",",
-                  meta_output = NULL) {
+                  patterns = NULL, filtered_columns = NULL, fixed = FALSE,
+                  meta_output = NULL,
+                  ...) {
   ## 0. write "unixCmdStr" depending on what's provided
   ## 1. first, select row numbers with head & sed
   ## 2. second, select columns with cut
   ## 3. third, filter the rows with the patterns provided by column
+
+  args = list(...)
 
   if(is.null(meta_output)){
     meta_output = bmeta(file)
@@ -29,7 +71,8 @@ bread <- function(file = NULL,
   if(!is.null(first_row) | !is.null(last_row) | !is.null(head) | !is.null(tail) ){
     unixCmdVec <- append(unixCmdVec,
                          bsubsetStr(file = file, head = head, tail = tail,
-                                    first_row = first_row, last_row = last_row, meta_output = meta_output))
+                                    first_row = first_row, last_row = last_row,
+                                    meta_output = meta_output, ...))
   }
 
   ### 2. select / cut
@@ -38,7 +81,7 @@ bread <- function(file = NULL,
                          bselectStr(file = file,
                                     colnames = colnames, colnums = colnums,
                                     meta_output = meta_output,
-                                    sep = sep))
+                                    ...))
 
     ## as we selected some columns, we must find the new set of colnames
     if(is.null(colnames)){
@@ -63,11 +106,15 @@ bread <- function(file = NULL,
   }
   ### 3. filter / grep
   if(!is.null(patterns) | !is.null(filtered_columns)){
+    patterns <- as.character(patterns)
+    if(fixed == T){
+      patterns <- escape_special_characters(patterns)
+    }
     unixCmdVec <- append(unixCmdVec,
                          bfilterStr(file = file,
                                     patterns = patterns, filtered_columns = filtered_columns,
                                     meta_output = meta_output,
-                                    sep = sep))
+                                    ...))
   }
 
   ### Here we have a vector of 1-3 unix command(s) as strings that we must seperate with "|"
@@ -78,7 +125,8 @@ bread <- function(file = NULL,
     unixCmdStr <- paste(unixCmdStr, unixCmdVec, sep = "| ")
   }
   ### Using the Unix Cmd now
-  df <- fread(cmd = unixCmdStr, sep = sep, dec = dec)
+  args <- c(cmd = unixCmdStr, args)
+  df <- do.call(fread, args)
   ### Adding back ColNames (sed & grep lose them)
   colnames(df) <- meta_output$colnames
   ## filtered_column can be a vector of string colnames or a vector of col indexes
@@ -89,7 +137,7 @@ bread <- function(file = NULL,
   if(is.null(filtered_columns) & !is.null(patterns)){
     warning('*** Filtering according to patterns but no filtered_columns entered.\nData has been filtered\n
             but there might be some false positives. ***')
-  } else {
+  } else if(!is.null(filtered_columns) & !is.null(patterns)){
     for(ii in 1:length(filtered_columns)){
       df <- df %>% filter(str_detect(!!sym(filtered_columns[ii]), patterns[ii]))
     }

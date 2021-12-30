@@ -1,17 +1,30 @@
-#' Filter data without loading it in memory with fread() and the grep command
+#' Pre-filters a data file by a pattern without loading it in memory
 #'
-#' Writes a string containing a grep call from the function parameters
+#' Simple wrapper for data.table::fread() allowing to filter data from a file
+#' with the Unix grep command. This method is useful if you want to load a file
+#' too large for your available memory (and encounter the "cannot allocate vector of size" error).
 #'
-#' @param file String. Required. Full path to a file compatible with data.table::fread()
-#' @param patterns String or vector of strings. Required. One or several patterns used to filter the data from the input file. Each element of the vector should correspond to the column to be filtered. Can use regular expressions.
-#' @param filtered_columns String, numeric or vector of strings or numeric. Optional. The columns to be filtered should be indicated through their names or their index number. Each element of the vector should correspond to the pattern with which it will be filtered.
-#' @param fixed logical. If TRUE, pattern is a string to be matched as is. Overrides all conflicting arguments.
+#' @param file String. Name or full path to a file compatible with data.table::fread()
+#' @param patterns Vector of strings. One or several patterns used to filter the data from the input file. Each element of the vector should correspond to the column to be filtered. Can use regular expressions.
+#' @param filtered_columns Vector of strings or numeric. The columns to be filtered should be indicated through their names or their index number. Each element of the vector should correspond to the pattern with which it will be filtered.
+#' @param fixed Logical. If TRUE, pattern is a string to be matched as is. Overrides all conflicting arguments.
 #' @param meta_output List. Optional. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.
-#' @keywords filter grep
+#' @param ... Arguments that must be passed to data.table::fread() like "sep" and "dec".
+#' @keywords big file filter grep allocate vector size
+#'
+#' @return A dataframe
+#'
 #' @examples
-#' bfilter(file = "./data/test.csv", patterns = c("200[0-9]", "red"), filtered_columns = c("YEAR", "COLOR"))
-#' bfilter(file = "./data/test.csv", patterns = "orange (purple)", filtered_columns = "COLOR", fixed = FALSE) # if T, bug
-#' bfilter(file = "./data/test.csv", patterns = "2002", fixed = F) # False positive because no column provided
+#' ## Filtering on 2 columns, using regex.
+#' bfilter(file = "./data/test.csv", patterns = c("200[0-9]", "red"), filtered_columns = c("YEAR", "COLOR"), sep = ";")
+#' bfilter(file = "./data/test.csv", patterns = c("2004|2005", "red"), filtered_columns = c("YEAR", "COLOR"), sep = ";")
+#' ## You need to use fixed = F if some patterns contain special characters that mess with regex
+#' bfilter(file = "./data/test.csv", patterns = "orange (purple)", filtered_columns = "COLOR", fixed = FALSE, sep = ";")
+#' ## If you do not provide the filtered_columns, you risk encountering false positives because the grep command filters on
+#' ## the whole file, not column by column. Here, the value 2002 will be found in the "PRICE" column as well.
+#' ## The filtered_column argument will just make the script do a second pass with dplyr::filter() to remove false positives.
+#' bfilter(file = "./data/test.csv", patterns = "2002", sep = ";")
+#' @export
 
 
 bfilter <- function(file = NULL,
@@ -19,28 +32,24 @@ bfilter <- function(file = NULL,
                     filtered_columns = NULL,
                     fixed = FALSE,
                     meta_output = NULL,
-                    sep = ";", dec = ","){
+                    ...){
 
-  # filter avant de charger en memoire
-  # on definit un pattern de filtre qui passera sur tout le fichier
-  # on definit (de preference mais optionnel) les colonnes qui doivent etre filtrees
-  # filtered_columns accepte les vecteurs de noms ou d'index (ex: c(1,3) ou c("SIREN", "DATE"))
-  # s'il y en a plusieurs, on doit faire correspondre les vecteurs patterns et filtered_columns
-  # dans ce cas il y a une 2nde passe avec dplyr::filter pour supprimer les faux positifs
-  # si on veut match plusieurs patterns pour une colonne on utilise "|" par exemple:
-  # patterns = c("51602913", "2019|2020"), filtered_columns = c("SIREN", "DATE"))
-  # on aura 1 seul SIREN et les dates 2019 et 2020 en mémoire
+  args <- list(...)
+
   if(is.null(meta_output)){
-    meta_output = bmeta(file)
+    meta_output = bmeta(file, ...)
   }
 
   if(fixed == T){
     patterns <- escape_special_characters(patterns)
   }
 
-  unixCmdStr <- bfilterStr(file = file, patterns = patterns, filtered_columns = filtered_columns, meta_output = meta_output) %>%
+  unixCmdStr <- bfilterStr(file = file, patterns = patterns,
+                           filtered_columns = filtered_columns,
+                           meta_output = meta_output) %>%
     paste(file)
-  df <- fread(cmd = unixCmdStr, sep = sep, dec = dec)
+  args <-  c(cmd = unixCmdStr, args)
+  df <- do.call(fread, args)
   colnames(df) <- meta_output$colnames
   ## filtered_column can be a vector of string colnames or a vector of col indexes
   ## We prefer names for dplyr::filter()
