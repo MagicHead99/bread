@@ -44,6 +44,7 @@ that allow opening, reading and splitting big files that wouldn't fit in memory
 }
 }
 \examples{
+\donttest{
 ## Filtering on 2 columns, using regex.
 bfile_split(file = "./data/test.csv", by_nrows = 5)
 bfile_split(file = "./data/test.csv", by_nfiles = 3)
@@ -53,6 +54,7 @@ bfile_split(file = "./data/test.csv", by_columns = c("YEAR", "COLOR"))
 ## to bfile_split()
 meta <- bmeta(file = "./data/test.csv")
 bfile_split(file = "./data/test.csv", by_nrows = 5, meta_output = meta)
+}
 }
 \keyword{allocate}
 \keyword{big}

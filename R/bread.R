@@ -45,6 +45,8 @@
 #' bread(file = "./data/test.csv", colnums = c(1,3))
 #' bread(file = "./data/test.csv", colnames = c("YEAR", "PRICE"), patterns = 2002, filtered_columns = "YEAR")
 #' bread(file = "./data/test.csv", colnames = c("YEAR", "COLOR"), patterns = "red", filtered_columns = "COLOR", first_row = 10, last_row = 18)
+#' @import data.table
+#' @import dplyr
 #' @export
 
 bread <- function(file = NULL,

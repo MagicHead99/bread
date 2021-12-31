@@ -11,6 +11,8 @@
 #' @examples
 #' ## Counting rows (almost like the band)
 #' bnrow(file = "./data/test.csv")
+#' @import stringr
+#' @import dplyr
 #' @export
 
 

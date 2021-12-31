@@ -12,6 +12,8 @@
 #' @examples
 #' ## Retrieving the column names
 #' bcolnames(file = "./data/test.csv")
+#' @import data.table
+#' @import dplyr
 #' @export
 
 bcolnames <- function(file = NULL, ...){

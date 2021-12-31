@@ -51,14 +51,11 @@ bfilterStr <- function(file = NULL,
 
 bselectStr <- function(file = NULL,
                        colnames = NULL, colnums = NULL,
-                       meta_output = NULL,
                        ...){
-  #args <- list(...)
 
-  if(is.null(meta_output)){
-    meta_output <- list()
-    meta_output$colnames <- bcolnames(file, ...)
-  }
+  args = list(...)
+  meta_output <- list()
+  meta_output$colnames <- bcolnames(file, ...)
 
   ## Case1: colnums provided but not colnames
   if(is.null(colnames)){
@@ -81,7 +78,27 @@ bselectStr <- function(file = NULL,
     }
   }
   ## unix cmd to cut the selected columns
-  unixCmdStr <- paste0('cut -d"', sep,'" -f', colnumStr, " ")
+  if("sep" %in% names(args)){
+    sepz = args[["sep"]]
+  } else {
+  ii <- 1
+  separatorz <- c(",",";","\t", " ", "|", ":")
+  header <- readLines(con = file, n = 1)
+  while(!exists("sepz")){
+      if(str_count(string = header, pattern = separatorz[ii]) == length(meta_output$colnames) - 1){
+        sepz <- separatorz[ii]
+        break
+      } else {
+        ii <-  ii + 1
+      }
+    if(ii > length(separatorz)){
+        stop("*** ERROR: We are having trouble determining the separator,
+             please add a sep = '...' argument ***")
+      }
+  }
+  }
+
+  unixCmdStr <- paste0('cut -d"', sepz,'" -f', colnumStr, " ")
   return(unixCmdStr)
 }
 

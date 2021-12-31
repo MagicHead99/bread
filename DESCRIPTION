@@ -8,11 +8,13 @@ Description: 'b stands for 'big files'. A simple wrapper for data.table::fread()
     The package is using unix commands like grep, cut and sed through (hopefully)
     intuitive parameters. IMPORTANT: On Windows environments, you need to have those Unix commands
     available and finable in your "PATH". The easiest way is to install "RTools". Alternatively,
-    MinGW, Git or Cygwin should also work if the /bin/ folders are in your Path.
+    MinGW, Git or Cygwin should also work if their /bin/ folders are in your Path.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
-Imports:
+Depends:
 	data.table,
-	dplyr
+	dplyr,
+	readr,
+	stringr

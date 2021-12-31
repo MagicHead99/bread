@@ -22,6 +22,8 @@
 #' ## first_row defaults as 1 and last_row as the last row of the file
 #' bsubset(file = "./data/test.csv", first_row = 5)
 #' bsubset(file = "./data/test.csv", last_row = 10)
+#' @import data.table
+#' @import dplyr
 #' @export
 
 bsubset <- function(file = NULL,

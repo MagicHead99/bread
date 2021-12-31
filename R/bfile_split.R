@@ -20,6 +20,7 @@
 #' @return Creates a number of csv files from the original larger file
 #'
 #' @examples
+#' \donttest{
 #' ## Filtering on 2 columns, using regex.
 #' bfile_split(file = "./data/test.csv", by_nrows = 5)
 #' bfile_split(file = "./data/test.csv", by_nfiles = 3)
@@ -29,6 +30,9 @@
 #' ## to bfile_split()
 #' meta <- bmeta(file = "./data/test.csv")
 #' bfile_split(file = "./data/test.csv", by_nrows = 5, meta_output = meta)
+#' }
+#' @import data.table
+#' @import dplyr
 #' @export
 
 bfile_split <- function(file = NULL,

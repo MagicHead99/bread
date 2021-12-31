@@ -13,6 +13,9 @@
 #' @examples
 #' bselect(file = "./data/test.csv", colnums = c(1,3))
 #' bselect(file = "./data/test.csv", colnames = c("PRICE", "COLOR"))
+#' @import data.table
+#' @import dplyr
+#' @import readr
 #' @export
 
 bselect <- function(file = NULL,

@@ -23,6 +23,8 @@
 #' ## the whole file, not column by column. Here, the value 2002 will be found in the "PRICE" column as well.
 #' ## The filtered_column argument will just make the script do a second pass with dplyr::filter() to remove false positives.
 #' bfilter(file = "./data/test.csv", patterns = "2002", sep = ";")
+#' @import data.table
+#' @import dplyr
 #' @export
 
 
