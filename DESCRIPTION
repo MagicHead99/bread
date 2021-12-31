@@ -1,19 +1,18 @@
 Package: bread
-Title: Manage big data files without loading them in memory with Unix Commands.
+Title: Manage big data files without loading them in memory
 Version: 0.0.0.9000
 Authors@R: 
-    person("Vincent", "Guégan", , "vincent.guegan@banque-france.fr", role = c("aut", "cre")
-Description: "B" stands bor "Big". A simple wrapper for data.table::fread() that allows subsetting or
+    person("Vincent", "Guegan", , "vincent.guegan@banque-france.fr", role = c("aut", "cre"))
+Description: 'b stands for 'big files'. A simple wrapper for data.table::fread() that allows subsetting or
     filtering rows and selecting columns of csv files too large for the available RAM.
     The package is using unix commands like grep, cut and sed through (hopefully)
     intuitive parameters. IMPORTANT: On Windows environments, you need to have those Unix commands
     available and finable in your "PATH". The easiest way is to install "RTools". Alternatively,
-    MinGW or Cygwin should also work.
-    
-License: GPL-3
+    MinGW, Git or Cygwin should also work if the /bin/ folders are in your Path.
+License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Imports:
-	data.table
-	tidyverse
+	data.table,
+	dplyr

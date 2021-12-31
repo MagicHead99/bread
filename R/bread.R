@@ -6,7 +6,8 @@
 #' This is useful if you want to load a big file too large for your available memory
 #' (and encounter the "cannot allocate vector of size" error) and know you can work on a
 #' subsample. "b" stands for "big file".
-#' This function allows to subset rows by their index number, select columns and filter with a pattern.
+#' This function allows to subset rows by their index number, select columns and filter
+#' with a pattern.
 #'
 #' @section Warning:
 #' Best practice would probably be to load the big file in a SQL database or something.
@@ -37,7 +38,6 @@
 #' @param patterns Vector of strings. One or several patterns used to filter the data from the input file. Each element of the vector should correspond to the column to be filtered. Can use regular expressions.
 #' @param filtered_columns Vector of strings or numeric. Optional. The columns to be filtered should be indicated through their names or their index number. Each element of the vector should correspond to the pattern with which it will be filtered.
 #' @param fixed Logical. If TRUE, pattern is a string to be matched as is. Overrides all conflicting arguments.
-#' @param meta_output List. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.
 #' @param ... Arguments that must be passed to data.table::fread() like "sep" or "dec".
 #' @keywords big file select cut allocate vector size
 #' @return A data frame with the selected columns and the subsetted and filtered data
@@ -45,11 +45,6 @@
 #' bread(file = "./data/test.csv", colnums = c(1,3))
 #' bread(file = "./data/test.csv", colnames = c("YEAR", "PRICE"), patterns = 2002, filtered_columns = "YEAR")
 #' bread(file = "./data/test.csv", colnames = c("YEAR", "COLOR"), patterns = "red", filtered_columns = "COLOR", first_row = 10, last_row = 18)
-#' ## For very big files with several million rows, the bmeta() function takes a long time to count the rows
-#' ## without loading the file in memory. Best practice is to save the result of bmeta() in a variable and provide it
-#' ## to bread()
-#' meta <- bmeta(file = "./data/test.csv")
-#' bread(file = "./data/test.csv", colnums = c(1,3), meta_output = meta)
 #' @export
 
 bread <- function(file = NULL,
@@ -66,18 +61,18 @@ bread <- function(file = NULL,
 
   args = list(...)
 
-  if(is.null(meta_output)){
-    meta_output = bmeta(file)
-  }
+  meta_output <- list()
+  meta_output$colnames <- bcolnames(file, ...)
 
   unixCmdVec <- NULL
 
   ### 1. subset / sed
   if(!is.null(first_row) | !is.null(last_row) | !is.null(head) | !is.null(tail) ){
     unixCmdVec <- append(unixCmdVec,
-                         bsubsetStr(file = file, head = head, tail = tail,
+                         bsubsetStr(file = file,
+                                    head = head, tail = tail,
                                     first_row = first_row, last_row = last_row,
-                                    meta_output = meta_output, ...))
+                                    ...))
   }
 
   ### 2. select / cut
@@ -85,7 +80,6 @@ bread <- function(file = NULL,
     unixCmdVec <- append(unixCmdVec,
                          bselectStr(file = file,
                                     colnames = colnames, colnums = colnums,
-                                    meta_output = meta_output,
                                     ...))
 
     ## as we selected some columns, we must find the new set of colnames
@@ -117,9 +111,8 @@ bread <- function(file = NULL,
     }
     unixCmdVec <- append(unixCmdVec,
                          bfilterStr(file = file,
-                                    patterns = patterns, filtered_columns = filtered_columns,
-                                    meta_output = meta_output,
-                                    ...))
+                                    patterns = patterns,
+                                    filtered_columns = filtered_columns))
   }
 
   ### Here we have a vector of 1-3 unix command(s) as strings that we must seperate with "|"

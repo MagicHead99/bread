@@ -11,27 +11,37 @@
 #' @param last_row Numeric. Last row of the portion of the file to subset.
 #' @param head Numeric. How many rows starting from the first in the file.
 #' @param tail Numeric. How many rows starting from the last in the file.
-#' @param meta_output List. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.
-#' @param ... Arguments that must be passed to data.table::fread() like "sep" or "dec".
+#' @param ... Arguments that must be passed to data.table::fread() like "sep".
 #' @keywords big file subset sed allocate vector size
 #' @return A dataframe containing the subsetted rows
 #' @examples
+#' ## Head or Tail... for the first n or last n rows
 #' bsubset(file = "./data/test.csv", head = 5)
+#' ## Subset from the middle of a file
 #' bsubset(file = "./data/test.csv", first_row = 5, last_row = 10)
+#' ## first_row defaults as 1 and last_row as the last row of the file
+#' bsubset(file = "./data/test.csv", first_row = 5)
+#' bsubset(file = "./data/test.csv", last_row = 10)
 #' @export
 
 bsubset <- function(file = NULL,
                     head = NULL, tail = NULL,
                     first_row = NULL, last_row = NULL,
-                    sep = ";", dec = ",",
-                    meta_output = NULL){
-  if(is.null(meta_output)){
-    meta_output = bmeta(file)
-  }
+                    ...){
+
+  args = list(...)
+
+  meta_output <- list()
+  meta_output$colnames <- bcolnames(file, ...)
+
   unixCmdStr <- bsubsetStr(file = file, head = head, tail = tail,
-                           first_row = first_row, last_row = last_row, meta_output = meta_output) %>%
+                           first_row = first_row, last_row = last_row,
+                           ...) %>%
     paste(file)
-  df <- fread(cmd = unixCmdStr, sep = sep, dec = dec)
+  args <- c(cmd = unixCmdStr, args)
+  df <- do.call(fread, args)
+  ## sed loses the colnames, we put them back on
   colnames(df) <- meta_output$colnames
+
   return(df)
 }

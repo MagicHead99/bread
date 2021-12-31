@@ -8,7 +8,6 @@
 #' @param patterns Vector of strings. One or several patterns used to filter the data from the input file. Each element of the vector should correspond to the column to be filtered. Can use regular expressions.
 #' @param filtered_columns Vector of strings or numeric. The columns to be filtered should be indicated through their names or their index number. Each element of the vector should correspond to the pattern with which it will be filtered.
 #' @param fixed Logical. If TRUE, pattern is a string to be matched as is. Overrides all conflicting arguments.
-#' @param meta_output List. Optional. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.
 #' @param ... Arguments that must be passed to data.table::fread() like "sep" and "dec".
 #' @keywords big file filter grep allocate vector size
 #'
@@ -31,22 +30,20 @@ bfilter <- function(file = NULL,
                     patterns = NULL,
                     filtered_columns = NULL,
                     fixed = FALSE,
-                    meta_output = NULL,
                     ...){
 
   args <- list(...)
 
-  if(is.null(meta_output)){
-    meta_output = bmeta(file, ...)
-  }
+  meta_output <- list()
+  meta_output$colnames <- bcolnames(file)
+
 
   if(fixed == T){
     patterns <- escape_special_characters(patterns)
   }
 
   unixCmdStr <- bfilterStr(file = file, patterns = patterns,
-                           filtered_columns = filtered_columns,
-                           meta_output = meta_output) %>%
+                           filtered_columns = filtered_columns) %>%
     paste(file)
   args <-  c(cmd = unixCmdStr, args)
   df <- do.call(fread, args)
