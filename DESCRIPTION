@@ -1,12 +1,13 @@
 Package: bread
-Title: Analyze Big Files Without Loading Them In Memory
+Title: Analyze Big Files Without Loading Them in Memory
 Version: 0.1.0
 Authors@R: 
     person("Vincent", "Guegan", , "vincent.guegan@banque-france.fr", role = c("aut", "cre"))
-Description: 'b stands for 'big files'. A simple wrapper for data.table::fread() that allows subsetting or
-    filtering rows and selecting columns of csv files too large for the available RAM.
-    The package is using unix commands like grep, cut and sed through (hopefully)
-    intuitive parameters. IMPORTANT: On Windows environments, you need to have those Unix commands
+Description: A simple set of wrapper functions for data.table::fread() that allows subsetting or
+    filtering rows and selecting columns of table-formatted files too large for the available RAM.
+    'b stands for 'big files'. The package is using unix commands like grep, cut and sed 
+    through (hopefully) intuitive parameters.
+    IMPORTANT: On Windows environments, you need to have those Unix commands
     available in your "PATH". The easiest way is to install "RTools". Alternatively,
     MinGW, Git or Cygwin should also work if their /bin/ folders are in your Path.
 License: GPL (>= 3)
