@@ -17,7 +17,7 @@
 
 
 bnrow <- function(file = NULL){
-  nrows <- shell(paste0("wc -l ", file), intern = TRUE) %>%
+  nrows <- system(paste0("wc -l ", file), intern = TRUE) %>%
     stringr::str_remove(pattern = " .*$") %>% as.numeric() %>% -1 ## -1 because headers
   return(nrows)
   }
