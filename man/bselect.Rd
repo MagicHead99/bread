@@ -2,7 +2,7 @@
 % Please edit documentation in R/bselect.R
 \name{bselect}
 \alias{bselect}
-\title{Pre-selects columns of a data file without loading it in memory}
+\title{Pre-selects columns of a data file before loading it in memory}
 \usage{
 bselect(file = NULL, colnames = NULL, colnums = NULL, ...)
 }
@@ -24,8 +24,11 @@ with the Unix cut command. This method is useful if you want to load a file
 too large for your available memory (and encounter the "cannot allocate vector of size" error).
 }
 \examples{
-bselect(file = "./data/test.csv", colnums = c(1,3))
-bselect(file = "./data/test.csv", colnames = c("PRICE", "COLOR"))
+file <- system.file("extdata", "test.csv", package = "bread")
+## Select the columns numbered 1 and 3
+bselect(file = file, colnums = c(1,3))
+## Select the columns named "PRICE" and "COLOR"
+bselect(file = file, colnames = c("PRICE", "COLOR"))
 }
 \keyword{allocate}
 \keyword{big}

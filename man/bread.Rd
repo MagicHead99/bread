@@ -2,7 +2,7 @@
 % Please edit documentation in R/bread.R
 \name{bread}
 \alias{bread}
-\title{Reads a file in table format, selecting columns, subsetting rows by number and filtering them by pattern}
+\title{Reads a file in table format, selecting columns, subsetting rows by number and filtering them by column values}
 \usage{
 bread(
   file = NULL,
@@ -15,11 +15,12 @@ bread(
   patterns = NULL,
   filtered_columns = NULL,
   fixed = FALSE,
-  meta_output = NULL,
   ...
 )
 }
 \arguments{
+\item{file}{String. Name or full path to a file compatible with data.table::fread()}
+
 \item{first_row}{Numeric. First row of the portion of the file to subset.}
 
 \item{last_row}{Numeric. Last row of the portion of the file to subset.}
@@ -53,17 +54,8 @@ subsample. "b" stands for "big file".
 This function allows to subset rows by their index number, select columns and filter
 with a pattern.
 }
-\section{Warning}{
-
-Best practice would probably be to load the big file in a SQL database or something.
-Or not working on huge CSV files in the first place.
-But if you have to, you hopefully won't have to delve into the fascinating grammar of
-Unix commands.
-}
-
-\section{Arguments}{
-
-You can mix and match the row subsetting, the filtering and the selecting of columns.
+\details{
+You can mix and match the row subsetting, the filtering by value and the selecting of columns.
 In order, the function:
 \enumerate{
 \item subsets the rows by their numbers (with sed). You need to input the index
@@ -75,14 +67,30 @@ colnums are provided, colnums will be prefered.
 \item filters the data selected so far with a pattern by column (with grep). The
 columns to be filtered should be indicated through their names or their index
 number. Each element of the vector should correspond to the pattern with which
-it will be filtered.
+it will be filtered.#'
 }
+}
+\section{Warning}{
+
+Best practice would probably be to load the big file in a SQL database or something.
+Or not working on huge CSV files in the first place.
+But if you have to, you hopefully won't have to delve into the fascinating grammar of
+Unix commands.
 }
 
 \examples{
-bread(file = "./data/test.csv", colnums = c(1,3))
-bread(file = "./data/test.csv", colnames = c("YEAR", "PRICE"), patterns = 2002, filtered_columns = "YEAR")
-bread(file = "./data/test.csv", colnames = c("YEAR", "COLOR"), patterns = "red", filtered_columns = "COLOR", first_row = 10, last_row = 18)
+file <- system.file("extdata", "test.csv", package = "bread")
+## Select the columns numbered 1 and 3
+bread(file = file, colnums = c(1,3))
+## Select the columns named "YEAR" and "PRICE", then filter to keep only the
+## value "2022" in column "YEAR"
+bread(file = file, colnames = c("YEAR", "PRICE"),
+      patterns = 2002, filtered_columns = "YEAR")
+## Subset to keep only the rows 10 to 18, select the columns named "YEAR"
+## and "COLOR" then filter to keep only the value "red" in column "COLOR"
+bread(file = file, colnames = c("YEAR", "COLOR"),
+      patterns = "red", filtered_columns = "COLOR",
+      first_row = 10, last_row = 18)
 }
 \keyword{allocate}
 \keyword{big}

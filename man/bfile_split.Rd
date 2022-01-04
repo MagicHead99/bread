@@ -2,7 +2,7 @@
 % Please edit documentation in R/bfile_split.R
 \name{bfile_split}
 \alias{bfile_split}
-\title{Splits files in several smaller files}
+\title{Splits a big file in several smaller files without loading it entirely in memory}
 \usage{
 bfile_split(
   file = NULL,
@@ -45,15 +45,19 @@ that allow opening, reading and splitting big files that wouldn't fit in memory
 }
 \examples{
 \donttest{
+\dontrun{
+file <- system.file("extdata", "test.csv", package = "bread")
 ## Filtering on 2 columns, using regex.
-bfile_split(file = "./data/test.csv", by_nrows = 5)
-bfile_split(file = "./data/test.csv", by_nfiles = 3)
-bfile_split(file = "./data/test.csv", by_columns = c("YEAR", "COLOR"))
-## For very big files with several million rows, the bmeta() function takes a long time to count the rows
-## without loading the file in memory. Best practice is to save the result of bmeta() in a variable and provide it
+bfile_split(file = file, by_nrows = 5)
+bfile_split(file = file, by_nfiles = 3)
+bfile_split(file = file, by_columns = c("YEAR", "COLOR"))
+## For very big files with several million rows, the bmeta() function takes
+##a long time to count the rows without loading the file in memory.
+## Best practice is to save the result of bmeta() in a variable and provide it
 ## to bfile_split()
-meta <- bmeta(file = "./data/test.csv")
-bfile_split(file = "./data/test.csv", by_nrows = 5, meta_output = meta)
+meta <- bmeta(file = file)
+bfile_split(file = file, by_nrows = 5, meta_output = meta)
+}
 }
 }
 \keyword{allocate}

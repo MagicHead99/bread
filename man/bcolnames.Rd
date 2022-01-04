@@ -2,7 +2,7 @@
 % Please edit documentation in R/bcolnames.R
 \name{bcolnames}
 \alias{bcolnames}
-\title{Retrieve the column names directly from a big file}
+\title{Retrieve the column names directly from a big file without loading it in memory}
 \usage{
 bcolnames(file = NULL, ...)
 }
@@ -15,11 +15,12 @@ bcolnames(file = NULL, ...)
 A character vector
 }
 \description{
-Simply reads the first line of a file with fread and the head Unix command.
+Simply reads the first line of a file with data.table::fread and the head Unix command.
 This allows analyzing big files that would not fit in memory (and cause an error
 such as "cannot allocate vector of size").
 }
 \examples{
+file <- system.file("extdata", "test.csv", package = "bread")
 ## Retrieving the column names
-bcolnames(file = "./data/test.csv")
+bcolnames(file = file)
 }

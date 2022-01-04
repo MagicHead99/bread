@@ -2,7 +2,7 @@
 % Please edit documentation in R/bnrow.R
 \name{bnrow}
 \alias{bnrow}
-\title{Count the number of rows of a big file}
+\title{Count the number of rows of a big file without loading it in memory}
 \usage{
 bnrow(file = NULL)
 }
@@ -18,6 +18,7 @@ This allows analyzing big files that would not fit in memory (and cause an error
 such as "cannot allocate vector of size").
 }
 \examples{
+file <- system.file("extdata", "test.csv", package = "bread")
 ## Counting rows (almost like the band)
-bnrow(file = "./data/test.csv")
+bnrow(file = file)
 }

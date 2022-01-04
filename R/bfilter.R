@@ -1,8 +1,9 @@
-#' Pre-filters a data file by a pattern without loading it in memory
+#' Pre-filters a data file using column values before loading it in memory
 #'
 #' Simple wrapper for data.table::fread() allowing to filter data from a file
 #' with the Unix grep command. This method is useful if you want to load a file
-#' too large for your available memory (and encounter the "cannot allocate vector of size" error).
+#' too large for your available memory (and encounter the "cannot allocate vector of size" error
+#' for example).
 #'
 #' @param file String. Name or full path to a file compatible with data.table::fread()
 #' @param patterns Vector of strings. One or several patterns used to filter the data from the input file. Each element of the vector should correspond to the column to be filtered. Can use regular expressions.
@@ -14,16 +15,22 @@
 #' @return A dataframe
 #'
 #' @examples
+#' file <- system.file("extdata", "test.csv", package = "bread")
 #' ## Filtering on 2 columns, using regex.
-#' bfilter(file = "./data/test.csv", patterns = c("200[0-9]", "red"), filtered_columns = c("YEAR", "COLOR"), sep = ";")
-#' bfilter(file = "./data/test.csv", patterns = c("2004|2005", "red"), filtered_columns = c("YEAR", "COLOR"), sep = ";")
-#' ## You need to use fixed = F if some patterns contain special characters that mess with regex
-#' bfilter(file = "./data/test.csv", patterns = "orange (purple)", filtered_columns = "COLOR", fixed = FALSE, sep = ";")
-#' ## If you do not provide the filtered_columns, you risk encountering false positives because the grep command filters on
-#' ## the whole file, not column by column. Here, the value 2002 will be found in the "PRICE" column as well.
-#' ## The filtered_column argument will just make the script do a second pass with dplyr::filter() to remove false positives.
-#' bfilter(file = "./data/test.csv", patterns = "2002", sep = ";")
-#' @import data.table
+#' bfilter(file = file, patterns = c("200[0-9]", "red"),
+#'       filtered_columns = c("YEAR", "COLOR"), sep = ";")
+#' bfilter(file = file, patterns = c("2004|2005", "red"),
+#'       filtered_columns = c("YEAR", "COLOR"), sep = ";")
+#' ## You need to use fixed = T if some patterns contain special characters
+#' ## that mess with regex like "(" and ")"
+#' bfilter(file = file, patterns = "orange (purple)",
+#'       filtered_columns = "COLOR", fixed = TRUE, sep = ";")
+#' ## If you do not provide the filtered_columns, you risk encountering
+#' ## false positives because the grep command filters on the whole file,
+#' ## not column by column. Here, the value 2002 will be found in the "PRICE"
+#' ## column as well. The filtered_column argument will just make the script
+#' ## do a second pass with dplyr::filter() to remove false positives.
+#' bfilter(file = file, patterns = "2002", sep = ";")
 #' @import dplyr
 #' @export
 
@@ -48,7 +55,7 @@ bfilter <- function(file = NULL,
                            filtered_columns = filtered_columns) %>%
     paste(file)
   args <-  c(cmd = unixCmdStr, args)
-  df <- do.call(fread, args)
+  df <- do.call(data.table::fread, args)
   colnames(df) <- meta_output$colnames
   ## filtered_column can be a vector of string colnames or a vector of col indexes
   ## We prefer names for dplyr::filter()
@@ -60,7 +67,7 @@ bfilter <- function(file = NULL,
             but there might be some false positives. ***')
   } else {
     for(ii in 1:length(filtered_columns)){
-      df <- df %>% filter(str_detect(!!sym(filtered_columns[ii]), patterns[ii]))
+      df <- df %>% filter(stringr::str_detect(!!sym(filtered_columns[ii]), patterns[ii]))
     }
   }
   return(df)

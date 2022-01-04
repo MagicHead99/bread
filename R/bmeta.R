@@ -1,4 +1,4 @@
-#' Internal help function generating nrow and colnames for the target file
+#' Helper function generating nrow and colnames for the target file without loading it in memory
 #'
 #' Generates a list that can be passed to the bfile_split() function
 #' in order to indicate the number of rows and the name of columns in the file.
@@ -11,8 +11,9 @@
 #' @return A list of 2
 #'
 #' @examples
+#' file <- system.file("extdata", "test.csv", package = "bread")
 #' ## Filtering on 2 columns, using regex.
-#' meta_output <- bmeta(file = "./data/test.csv")
+#' meta_output <- bmeta(file = file)
 #' @export
 
 bmeta <- function(file = NULL, ...){

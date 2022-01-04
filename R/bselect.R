@@ -1,4 +1,4 @@
-#' Pre-selects columns of a data file without loading it in memory
+#' Pre-selects columns of a data file before loading it in memory
 #'
 #' Simple wrapper for data.table::fread() allowing to select columns of data from a file
 #' with the Unix cut command. This method is useful if you want to load a file
@@ -11,11 +11,12 @@
 #' @keywords big file select cut allocate vector size
 #' @return A dataframe with the selected columns
 #' @examples
-#' bselect(file = "./data/test.csv", colnums = c(1,3))
-#' bselect(file = "./data/test.csv", colnames = c("PRICE", "COLOR"))
-#' @import data.table
+#' file <- system.file("extdata", "test.csv", package = "bread")
+#' ## Select the columns numbered 1 and 3
+#' bselect(file = file, colnums = c(1,3))
+#' ## Select the columns named "PRICE" and "COLOR"
+#' bselect(file = file, colnames = c("PRICE", "COLOR"))
 #' @import dplyr
-#' @import readr
 #' @export
 
 bselect <- function(file = NULL,
@@ -28,6 +29,6 @@ bselect <- function(file = NULL,
                            ...) %>%
     paste(file)
   args <- c(cmd = unixCmdStr, args)
-  df <- do.call(fread, args)
+  df <- do.call(data.table::fread, args)
   return(df)
 }

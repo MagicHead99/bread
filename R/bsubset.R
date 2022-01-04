@@ -15,14 +15,14 @@
 #' @keywords big file subset sed allocate vector size
 #' @return A dataframe containing the subsetted rows
 #' @examples
+#' file <- system.file("extdata", "test.csv", package = "bread")
 #' ## Head or Tail... for the first n or last n rows
-#' bsubset(file = "./data/test.csv", head = 5)
+#' bsubset(file = file, head = 5)
 #' ## Subset from the middle of a file
-#' bsubset(file = "./data/test.csv", first_row = 5, last_row = 10)
+#' bsubset(file = file, first_row = 5, last_row = 10)
 #' ## first_row defaults as 1 and last_row as the last row of the file
-#' bsubset(file = "./data/test.csv", first_row = 5)
-#' bsubset(file = "./data/test.csv", last_row = 10)
-#' @import data.table
+#' bsubset(file = file, first_row = 5)
+#' bsubset(file = file, last_row = 10)
 #' @import dplyr
 #' @export
 
@@ -41,7 +41,7 @@ bsubset <- function(file = NULL,
                            ...) %>%
     paste(file)
   args <- c(cmd = unixCmdStr, args)
-  df <- do.call(fread, args)
+  df <- do.call(data.table::fread, args)
   ## sed loses the colnames, we put them back on
   colnames(df) <- meta_output$colnames
 

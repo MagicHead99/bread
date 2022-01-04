@@ -2,7 +2,7 @@
 % Please edit documentation in R/bmeta.R
 \name{bmeta}
 \alias{bmeta}
-\title{Internal help function generating nrow and colnames for the target file}
+\title{Helper function generating nrow and colnames for the target file without loading it in memory}
 \usage{
 bmeta(file = NULL, ...)
 }
@@ -21,6 +21,7 @@ The output can be saved in a variable and provided in the meta_output
 argument to save time. Counting rows in very large files can take some time.
 }
 \examples{
+file <- system.file("extdata", "test.csv", package = "bread")
 ## Filtering on 2 columns, using regex.
-meta_output <- bmeta(file = "./data/test.csv")
+meta_output <- bmeta(file = file)
 }

@@ -1,6 +1,6 @@
-#' Retrieve the column names directly from a big file
+#' Retrieve the column names directly from a big file without loading it in memory
 #'
-#' Simply reads the first line of a file with fread and the head Unix command.
+#' Simply reads the first line of a file with data.table::fread and the head Unix command.
 #' This allows analyzing big files that would not fit in memory (and cause an error
 #' such as "cannot allocate vector of size").
 #'
@@ -10,9 +10,9 @@
 #' @return A character vector
 #'
 #' @examples
+#' file <- system.file("extdata", "test.csv", package = "bread")
 #' ## Retrieving the column names
-#' bcolnames(file = "./data/test.csv")
-#' @import data.table
+#' bcolnames(file = file)
 #' @import dplyr
 #' @export
 
@@ -23,7 +23,7 @@ bcolnames <- function(file = NULL, ...){
   ## in some cases, the first row alone will not be parsed cleanly by colnames()
   unixCmdStr <- paste('head -n 2', file)
   args <- c(cmd = unixCmdStr, args)
-  colnames <- do.call(fread, args) %>%
+  colnames <- do.call(data.table::fread, args) %>%
     colnames()
 
   return(colnames)

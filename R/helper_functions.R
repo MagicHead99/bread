@@ -1,7 +1,7 @@
 ## internal function to escape special characters
 
 escape_special_characters <- function(string){
-  str_replace_all(as.character(string), "(\\W)", "\\\\\\1")
+  stringr::str_replace_all(as.character(string), "(\\W)", "\\\\\\1")
 }
 
 #* Internal helper function generating the grep Command String
@@ -82,10 +82,13 @@ bselectStr <- function(file = NULL,
     sepz = args[["sep"]]
   } else {
   ii <- 1
+  ## classic separators : if it's not one of those, the user will have to set it
   separatorz <- c(",",";","\t", " ", "|", ":")
   header <- readLines(con = file, n = 1)
   while(!exists("sepz")){
-      if(str_count(string = header, pattern = separatorz[ii]) == length(meta_output$colnames) - 1){
+    ## if the number of separators in the header is equal to the number of columns (minus one)
+    ## we have found the separator
+      if(stringr::str_count(string = header, pattern = separatorz[ii]) == length(meta_output$colnames) - 1){
         sepz <- separatorz[ii]
         break
       } else {
@@ -166,7 +169,7 @@ bsubsetStr <- function(file = NULL,
     ### maybe in git / mingw / cygwin...
     ### Exceptionnally we'll use powershell if it's installed
     if(.Platform$OS.type == "windows"){
-      if(suppressWarnings(str_detect(string = system("where tail.exe",
+      if(suppressWarnings(stringr::str_detect(string = system("where tail.exe",
                                                      intern = T),
                                      pattern = "tail.exe"))){
         ### if tail.exe is found, simplest solution

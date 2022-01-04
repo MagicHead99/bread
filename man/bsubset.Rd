@@ -37,13 +37,14 @@ You need to input the index number of the first and last rows you want to load i
 or alternatively use either the head or tail arguments to subset the first or last rows of the file.
 }
 \examples{
+file <- system.file("extdata", "test.csv", package = "bread")
 ## Head or Tail... for the first n or last n rows
-bsubset(file = "./data/test.csv", head = 5)
+bsubset(file = file, head = 5)
 ## Subset from the middle of a file
-bsubset(file = "./data/test.csv", first_row = 5, last_row = 10)
+bsubset(file = file, first_row = 5, last_row = 10)
 ## first_row defaults as 1 and last_row as the last row of the file
-bsubset(file = "./data/test.csv", first_row = 5)
-bsubset(file = "./data/test.csv", last_row = 10)
+bsubset(file = file, first_row = 5)
+bsubset(file = file, last_row = 10)
 }
 \keyword{allocate}
 \keyword{big}
