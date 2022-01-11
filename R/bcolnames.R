@@ -21,7 +21,7 @@ bcolnames <- function(file = NULL, ...){
 
   ## We get the 2 first rows - which is not much slower than one row - because
   ## in some cases, the first row alone will not be parsed cleanly by colnames()
-  unixCmdStr <- paste('head -n 2', file)
+  unixCmdStr <- paste('head -n 2', shQuote(file))
   args <- c(cmd = unixCmdStr, args)
   colnames <- do.call(data.table::fread, args) %>%
     colnames()

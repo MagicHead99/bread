@@ -44,6 +44,7 @@ bfile_split <- function(file = NULL,
                         meta_output = NULL,
                         ...){
   args = list(...)
+
   ## ADD CHECKS THAT ONLY 1 PARAM IS PROVIDED, STOP IF MORE
   if (missing(by_nfiles) + missing(by_nrows) + missing(by_columns) < 2L){
     stop("Used more than one of the arguments by_nfiles=, by_nrows=, by_columns=.")
@@ -71,7 +72,7 @@ bfile_split <- function(file = NULL,
 
     #### 1st chunk
     ##### +1 because header
-    unixCmdStr <- paste('head -n', (rows_by_chunk_except_last + 1), file)
+    unixCmdStr <- paste('head -n', (rows_by_chunk_except_last + 1), shQuote(file))
     args_fread <- c(cmd = unixCmdStr, args)
     df_temp <- do.call(data.table::fread, args_fread)
 
@@ -83,8 +84,8 @@ bfile_split <- function(file = NULL,
 
     #### chunks 2 to n-1
     for(ii in 2:(by_nfiles - 1)){
-      unixCmdStr <- paste0('sed -e 1,', ((rows_by_chunk_except_last * (ii-1)) +1),
-                           'd;', (rows_by_chunk_except_last * ii) + 1,'q ', file)
+      unixCmdStr <- paste0("sed -e '1,", ((rows_by_chunk_except_last * (ii-1)) +1),
+                           "d;", (rows_by_chunk_except_last * ii) + 1,"q' ", shQuote(file))
       ##### sed loses the colnames, we must add them back
       args_fread <- c(cmd = unixCmdStr, args)
       df_temp <- do.call(data.table::fread, args_fread) %>%
@@ -99,9 +100,9 @@ bfile_split <- function(file = NULL,
 
 
     #### last chunk n
-    unixCmdStr <- paste0('sed -e 1,',
+    unixCmdStr <- paste0("sed -e '1,",
                          ((rows_by_chunk_except_last * (by_nfiles - 1))) + 1,
-                         'd;', meta_output$nrows + 1,'q ', file)
+                         "d;", meta_output$nrows + 1,"q' ", shQuote(file))
     args_fread <- c(cmd = unixCmdStr, args)
     df_temp <- do.call(data.table::fread, args_fread) %>%
       `colnames<-`(meta_output$colnames)
@@ -139,7 +140,7 @@ bfile_split <- function(file = NULL,
 
     ##### head doesn't lose colnames
     unixCmdStr <- paste('head -n', (rows_by_chunk_except_last + 1),
-                        file)
+                        shQuote(file))
     args_fread <- c(cmd = unixCmdStr, args)
     df_temp <- do.call(data.table::fread, args_fread)
     print(paste0(1, " - - ", nrow(df_temp)))
@@ -153,10 +154,10 @@ bfile_split <- function(file = NULL,
 
     #### chunk 2 to n, here the last one is n+1
     for(ii in 2:(nfiles)){
-      unixCmdStr <- paste0('sed -e 1,',
+      unixCmdStr <- paste0("sed -e '1,",
                            ((rows_by_chunk_except_last * (ii-1)) +1),
-                           'd;', (rows_by_chunk_except_last * ii) + 1,
-                           'q ', file)
+                           "d;", (rows_by_chunk_except_last * ii) + 1,
+                           "q' ", shQuote(file))
       args_fread <- c(cmd = unixCmdStr, args)
       df_temp <- do.call(data.table::fread, args_fread) %>%
         `colnames<-`(meta_output$colnames)
@@ -169,9 +170,9 @@ bfile_split <- function(file = NULL,
     }
     #### The remainder can be zero, in that case there is not a n+1th file
     if(last_chunk != 0){
-      unixCmdStr <- paste0('sed -e 1,',
-                           ((rows_by_chunk_except_last * (nfiles)) + 1), 'd;',
-                           meta_output$nrows + 1,'q ', file)
+      unixCmdStr <- paste0("sed -e '1,",
+                           ((rows_by_chunk_except_last * (nfiles)) + 1), "d;",
+                           meta_output$nrows + 1,"q' ", shQuote(file))
       args_fread <- c(cmd = unixCmdStr, args)
       df_temp <- do.call(data.table::fread, args_fread) %>%
         `colnames<-`(meta_output$colnames)
@@ -203,7 +204,7 @@ bfile_split <- function(file = NULL,
                              colnums = colnums,
                              meta_output = meta_output,
                              ...) %>%
-      paste(file)
+      paste(shQuote(file))
 
     #### we load only the columns we need to identify the unique values then
     #### find all combinations to later apply filters

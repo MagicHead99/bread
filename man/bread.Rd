@@ -45,7 +45,7 @@ bread(
 A data frame with the selected columns and the subsetted and filtered data
 }
 \description{
-Wrapper for data.table::fread() simplifying the use of Unix commands like grep, cut and sed
+Wrapper for data.table::fread() simplifying the use of Unix commands like grep, cut, awk and sed
 on a data file \emph{before} loading it in memory. The Unix commands are automatically generated
 from the arguments.
 This is useful if you want to load a big file too large for your available memory
@@ -58,7 +58,7 @@ with a pattern.
 You can mix and match the row subsetting, the filtering by value and the selecting of columns.
 In order, the function:
 \enumerate{
-\item subsets the rows by their numbers (with sed). You need to input the index
+\item subsets the rows by their numbers (with sed & awk). You need to input the index
 number of the first and last rows you want to load in memory with fread(),
 or alternatively use either the head or tail arguments to subset the first or
 last rows of the file.

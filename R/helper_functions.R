@@ -28,7 +28,7 @@ bfilterStr <- function(file = NULL,
   }
 
   filterStr <- paste(patterns, collapse = "|")
-  unixCmdStr <- paste0('grep -aEu "', filterStr, '" ')
+  unixCmdStr <- paste0('grep -aE "', filterStr, '" ')
   return(unixCmdStr)
 }
 
@@ -106,9 +106,9 @@ bselectStr <- function(file = NULL,
 }
 
 
-#* Internal helper function generating the sed Command String
+#* Internal helper function generating the sed/awk Command String
 #*
-#* Writes a string containing a sed call from the function parameters
+#* Writes a string containing a sed or awk call from the function parameters
 #*
 #* @param file String. Full path to a file
 #* @param first_row Numeric. First row of the portion of the file to subset.
@@ -116,7 +116,7 @@ bselectStr <- function(file = NULL,
 #* @param head Numeric. How many rows starting from the first in the file.
 #* @param tail Numeric. How many rows starting from the last in the file.
 #* @param ... Arguments that must be passed to data.table::fread() like "sep". Only used for the bmeta() call here.
-#* @keywords subset sed
+#* @keywords subset sed awk
 #* @return A string
 #* @examples
 #* bsubsetStr(file = "./data/test.csv", head = 5)
@@ -155,18 +155,30 @@ bsubsetStr <- function(file = NULL,
   ### String building
   ### 1st case: first_row and/or last_row are provided
   if(is.null(head) & is.null(tail)){
+
+    if(.Platform$OS.type == "windows"){
     if(!is.null(last_row)){
-      unixCmdStr <- paste0('sed -e 1,', (first_row), 'd;', (last_row + 1),'q ')
+      unixCmdStr <- paste0("sed -e '1,", (first_row), "d;", (last_row + 1),"q' ")
     } else {
-      unixCmdStr <- paste0('sed -e 1,', (first_row), 'd;')
+      unixCmdStr <- paste0("sed -e '1,", (first_row), "d;'")
     }
+    } else {
+      if(!is.null(last_row)){
+        unixCmdStr <- paste0("awk 'NR >= ", (first_row +1), " && NR <= ", (last_row + 1), "' ")
+      } else {
+        unixCmdStr <- paste0("awk 'NR >= ", (first_row +1), "' ")
+      }
+    }
+
+
+
     ### 2nd case, head is provided
   } else if(!is.null(head)){
-    unixCmdStr <- paste0('sed ', (head + 1), 'q ')
+    unixCmdStr <- paste0('head -n ', (head + 1), ' ')
   } else {
     ### 3rd case: tail
-    ### tail.exe is hard to find on Windows (not in RTools)
-    ### maybe in git / mingw / cygwin...
+    ### tail.exe is hard to find on Windows (not in older versions of RTools)
+    ### maybe in git / cygwin...
     ### Exceptionnally we'll use powershell if it's installed
     if(.Platform$OS.type == "windows"){
       if(suppressWarnings(stringr::str_detect(string = system("where tail.exe",
@@ -174,7 +186,7 @@ bsubsetStr <- function(file = NULL,
                                      pattern = "tail.exe"))){
         ### if tail.exe is found, simplest solution
         unixCmdStr <- paste0("tail -n ", tail)
-        ### if note Check env for powershell trace
+        ### if not Check env for powershell trace
       } else if("PSModulePath" %in% names(Sys.getenv())){
         ### OK, now the variable name doesn't make sense anymore but let's be pragmatic
         ### just this once
@@ -188,10 +200,50 @@ bsubsetStr <- function(file = NULL,
 
     } else {
       ### if unix, tail should be installed hopefully
-      ### to be confirmed, i don't have enough experience there
       unixCmdStr <- paste0("tail -n ", tail)
     }
   }
 
   return(unixCmdStr)
+}
+
+addCmdsToPath <- function(){
+  if(.Platform$OS.type == "windows"){
+  oldPath <- Sys.getenv("PATH")
+  # add Rtools / Git / Cygwin to path
+  CMD = c('reg query "HKLM\\Software\\R-core\\Rtools" /v InstallPath',
+          'reg query "HKLM\\Software\\Cygwin\\setup" /v rootdir',
+          'reg query "HKLM\\Software\\GitForWindows" /v InstallPath')
+  # subdirectories with cmds for those 3 apps
+  DIR = c('\\usr\\bin',
+          '\\bin',
+          '\\usr\\bin')
+  output <- c()
+
+  for(ii in 1:length(CMD)){
+    tryCatch(
+      {
+        # check registry for installPaths, extract it and add subdirectories
+        output[ii] <- system(command = CMD[ii], intern = T) %>%
+          stringr::str_subset(pattern = "REG_SZ") %>% stringr::str_split(pattern = "  ", simplify = T) %>%
+          last() %>% paste0(DIR[ii])
+        },
+      error=function(cond) {output[ii] <<- NA
+      },
+      warning=function(cond) {output[ii] <<- NA
+      }
+    )
+  }
+
+  output <- output %>% stats::na.omit() %>% paste(collapse = ";")
+  if(output == ""){message("### Neither RTools, Git nor Cygwin have been detected.
+### Please make sure you have another source for the necessary Unix cmds
+### in your PATH.")}
+  Sys.setenv(PATH = paste(oldPath, output, sep = ";"))
+  }
+}
+
+##
+.onLoad <- function(libname, pkgname) {
+  addCmdsToPath()
 }

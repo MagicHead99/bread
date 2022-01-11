@@ -1,6 +1,6 @@
 #' Reads a file in table format, selecting columns, subsetting rows by number and filtering them by column values
 #'
-#' Wrapper for data.table::fread() simplifying the use of Unix commands like grep, cut and sed
+#' Wrapper for data.table::fread() simplifying the use of Unix commands like grep, cut, awk and sed
 #' on a data file *before* loading it in memory. The Unix commands are automatically generated
 #' from the arguments.
 #' This is useful if you want to load a big file too large for your available memory
@@ -11,7 +11,7 @@
 #'
 #' You can mix and match the row subsetting, the filtering by value and the selecting of columns.
 #' In order, the function:
-#' 1. subsets the rows by their numbers (with sed). You need to input the index
+#' 1. subsets the rows by their numbers (with sed & awk). You need to input the index
 #' number of the first and last rows you want to load in memory with fread(),
 #' or alternatively use either the head or tail arguments to subset the first or
 #' last rows of the file.
@@ -64,7 +64,7 @@ bread <- function(file = NULL,
                   patterns = NULL, filtered_columns = NULL, fixed = FALSE,
                   ...) {
   ## 0. write "unixCmdStr" depending on what's provided
-  ## 1. first, select row numbers with head & sed
+  ## 1. first, select row numbers with head & sed/awk
   ## 2. second, select columns with cut
   ## 3. third, filter the rows with the patterns provided by column
 
@@ -126,7 +126,7 @@ bread <- function(file = NULL,
 
   ### Here we have a vector of 1-3 unix command(s) as strings that we must seperate with "|"
   ### adding the file after the first
-  unixCmdStr <- paste(unixCmdVec[1], file)
+  unixCmdStr <- paste(unixCmdVec[1], shQuote(file))
   if(length(unixCmdVec) > 1){
     unixCmdVec <- paste(unixCmdVec[-1], collapse = "| ")
     unixCmdStr <- paste(unixCmdStr, unixCmdVec, sep = "| ")
@@ -134,7 +134,7 @@ bread <- function(file = NULL,
   ### Using the Unix Cmd now
   args <- c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
-  ### Adding back ColNames (sed & grep lose them)
+  ### Adding back ColNames (sed & awk & grep lose them)
   colnames(df) <- meta_output$colnames
   ## filtered_column can be a vector of string colnames or a vector of col indexes
   ## We prefer names for dplyr::filter()

@@ -35,7 +35,7 @@ for example).
 \examples{
 file <- system.file("extdata", "test.csv", package = "bread")
 ## Filtering on 2 columns, using regex.
-bfilter(file = file, patterns = c("200[0-9]", "red"),
+bfilter(file = file, patterns = c("200[4-6]", "red"),
       filtered_columns = c("YEAR", "COLOR"), sep = ";")
 bfilter(file = file, patterns = c("2004|2005", "red"),
       filtered_columns = c("YEAR", "COLOR"), sep = ";")

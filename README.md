@@ -21,8 +21,7 @@ If you have to, you hopefully won't have to delve right away into the fascinatin
 bread makes heavy use of Unix commands like grep, sed, wc and cut. They are available by default in a Unix environments.
 For Windows, you need to install those commands externally and simulate a Unix environment and make sure that the executables 
 are in the Windows PATH variable.
-To my knowledge, the simplest way is to install RTools (the bin folder will be added automatically to the PATH). Git, Cygwin, 
-Mingw64 are other strong contenders (as long as the PATH is correctly setup.)
+To my knowledge, the simplest way is to install RTools (the bin folder will be added automatically to the PATH). Git or Cygwin are other strong contenders (as long as the PATH is correctly setup.)
 
 ## Installation
 ```r

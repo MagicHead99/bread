@@ -27,7 +27,7 @@ bselect <- function(file = NULL,
   unixCmdStr <- bselectStr(file = file,
                            colnames = colnames, colnums = colnums,
                            ...) %>%
-    paste(file)
+    paste(shQuote(file))
   args <- c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
   return(df)
