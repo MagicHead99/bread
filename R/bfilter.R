@@ -46,6 +46,13 @@ bfilter <- function(file = NULL,
   meta_output <- list()
   meta_output$colnames <- bcolnames(file)
 
+  ## Quoting the file to prevent errors due to special characters like ")"
+  ## according to environment
+  if(.Platform$OS.type == "windows"){
+    qfile <- shQuote(file, type = "cmd2")
+  } else if(.Platform$OS.type == "unix"){
+    qfile <- shQuote(file)
+  }
 
   if(fixed == T){
     patterns <- escape_special_characters(patterns)
@@ -53,7 +60,7 @@ bfilter <- function(file = NULL,
 
   unixCmdStr <- bfilterStr(file = file, patterns = patterns,
                            filtered_columns = filtered_columns) %>%
-    paste(shQuote(file))
+    paste(qfile)
   args <-  c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
   colnames(df) <- meta_output$colnames

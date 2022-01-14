@@ -18,7 +18,15 @@
 
 bnrow <- function(file = NULL){
 
-  nrows <- system(paste0("wc -l ", shQuote(file)), intern = TRUE) %>%
+  ## Quoting the file to prevent errors due to special characters like ")"
+  ## according to environment
+  if(.Platform$OS.type == "windows"){
+    qfile <- shQuote(file, type = "cmd2")
+  } else if(.Platform$OS.type == "unix"){
+    qfile <- shQuote(file)
+  }
+
+  nrows <- system(paste0("wc -l ", qfile), intern = TRUE) %>%
     stringr::str_remove(pattern = " .*$") %>% as.numeric() %>% -1 ## -1 because headers
   return(nrows)
   }

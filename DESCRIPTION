@@ -1,6 +1,6 @@
 Package: bread
 Title: Analyze Big Files Without Loading Them in Memory
-Version: 0.1.3
+Version: 0.1.4
 Authors@R: 
     person("Vincent", "Guegan", , "vincent.guegan@banque-france.fr", role = c("aut", "cre"))
 Description: A simple set of wrapper functions for data.table::fread() that allows subsetting or
@@ -16,8 +16,8 @@ BugReports: https://github.com/MagicHead99/bread/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
-Depends:
-	dplyr
-Imports:
-    data.table,
-    stringr
+Depends: dplyr
+Imports: data.table, stringr
+NeedsCompilation: no
+Author: Vincent Guegan [aut, cre]
+Maintainer: Vincent Guegan <vincent.guegan@banque-france.fr>

@@ -73,6 +73,14 @@ bread <- function(file = NULL,
   meta_output <- list()
   meta_output$colnames <- bcolnames(file, ...)
 
+  ## Quoting the file to prevent errors due to special characters like ")"
+  ## according to environment
+  if(.Platform$OS.type == "windows"){
+    qfile <- shQuote(file, type = "cmd2")
+  } else if(.Platform$OS.type == "unix"){
+    qfile <- shQuote(file)
+  }
+
   unixCmdVec <- NULL
 
   ### 1. subset / sed
@@ -92,9 +100,11 @@ bread <- function(file = NULL,
                                     ...))
 
     ## as we selected some columns, we must find the new set of colnames
+    ## we have to use "sort()" as the "cut" command generates the columns in the
+    ## order it reads them, not in the order requested
     if(is.null(colnames)){
       if(!is.null(colnums)){
-        meta_output$colnames <- meta_output$colnames[colnums]
+        meta_output$colnames <- meta_output$colnames[sort(colnums)]
       }
       ## Case2: neither colnums nor colnames provided
       else {
@@ -104,11 +114,11 @@ bread <- function(file = NULL,
     } else {
       if(!is.null(colnums)){
         warning("*** if both colnums and colnames are provided, colnums takes over (arbitrarily) ***")
-        meta_output$colnames <- meta_output$colnames[colnums]
+        meta_output$colnames <- meta_output$colnames[sort(colnums)]
         ## Case4: colnames provided but not colnums
       } else {
         colnums <- match(colnames, meta_output$colnames)
-        meta_output$colnames <- meta_output$colnames[colnums]
+        meta_output$colnames <- meta_output$colnames[sort(colnums)]
       }
     }
   }
@@ -126,7 +136,7 @@ bread <- function(file = NULL,
 
   ### Here we have a vector of 1-3 unix command(s) as strings that we must seperate with "|"
   ### adding the file after the first
-  unixCmdStr <- paste(unixCmdVec[1], shQuote(file))
+  unixCmdStr <- paste(unixCmdVec[1], qfile)
   if(length(unixCmdVec) > 1){
     unixCmdVec <- paste(unixCmdVec[-1], collapse = "| ")
     unixCmdStr <- paste(unixCmdStr, unixCmdVec, sep = "| ")

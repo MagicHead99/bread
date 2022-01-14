@@ -33,6 +33,14 @@ bsubset <- function(file = NULL,
 
   args = list(...)
 
+  ## Quoting the file to prevent errors due to special characters like ")"
+  ## according to environment
+  if(.Platform$OS.type == "windows"){
+    qfile <- shQuote(file, type = "cmd2")
+  } else if(.Platform$OS.type == "unix"){
+    qfile <- shQuote(file)
+  }
+
   meta_output <- list()
   meta_output$colnames <- bcolnames(file, ...)
 
@@ -40,7 +48,7 @@ bsubset <- function(file = NULL,
   unixCmdStr <- bsubsetStr(file = file, head = head, tail = tail,
                            first_row = first_row, last_row = last_row,
                            ...) %>%
-    paste(shQuote(file))
+    paste(qfile)
   args <- c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
   ## sed / awk loses the colnames, we put them back on
