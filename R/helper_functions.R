@@ -84,7 +84,14 @@ bselectStr <- function(file = NULL,
   ii <- 1
   ## classic separators : if it's not one of those, the user will have to set it
   separatorz <- c(",",";","\t", " ", "|", ":")
-  header <- readLines(con = file, n = 1)
+  ## Quoting the file to prevent errors due to special characters like ")"
+  ## according to environment
+  if(.Platform$OS.type == "windows"){
+    qfile <- shQuote(file, type = "cmd2")
+  } else if(.Platform$OS.type == "unix"){
+    qfile <- shQuote(file)
+  }
+  header <- system(command = paste("head -n 1 ", qfile), intern = T)
   while(!exists("sepz")){
     ## if the number of separators in the header is equal to the number of columns (minus one)
     ## we have found the separator
@@ -153,20 +160,21 @@ bsubsetStr <- function(file = NULL,
   }
 
   ### String building
+  ####### added as.integer in v0.1.4 to prevent scientific notation...
   ### 1st case: first_row and/or last_row are provided
   if(is.null(head) & is.null(tail)){
 
     if(.Platform$OS.type == "windows"){
     if(!is.null(last_row)){
-      unixCmdStr <- paste0("sed -e '1,", (first_row), "d;", (last_row + 1),"q' ")
+      unixCmdStr <- paste0("sed -e '1,", as.integer(first_row), "d;", as.integer(last_row + 1),"q' ")
     } else {
-      unixCmdStr <- paste0("sed -e '1,", (first_row), "d;'")
+      unixCmdStr <- paste0("sed -e '1,", as.integer(first_row), "d;'")
     }
     } else {
       if(!is.null(last_row)){
-        unixCmdStr <- paste0("awk 'NR >= ", (first_row +1), " && NR <= ", (last_row + 1), "' ")
+        unixCmdStr <- paste0("awk 'NR >= ", as.integer(first_row +1), " && NR <= ", as.integer(last_row + 1), "' ")
       } else {
-        unixCmdStr <- paste0("awk 'NR >= ", (first_row +1), "' ")
+        unixCmdStr <- paste0("awk 'NR >= ", as.integer(first_row +1), "' ")
       }
     }
 
@@ -174,7 +182,7 @@ bsubsetStr <- function(file = NULL,
 
     ### 2nd case, head is provided
   } else if(!is.null(head)){
-    unixCmdStr <- paste0('head -n ', (head + 1), ' ')
+    unixCmdStr <- paste0('head -n ', as.integer(head + 1), ' ')
   } else {
     ### 3rd case: tail
     ### tail.exe is hard to find on Windows (not in older versions of RTools)
@@ -185,22 +193,22 @@ bsubsetStr <- function(file = NULL,
                                                      intern = T),
                                      pattern = "tail.exe"))){
         ### if tail.exe is found, simplest solution
-        unixCmdStr <- paste0("tail -n ", tail)
+        unixCmdStr <- paste0("tail -n ", as.integer(tail))
         ### if not Check env for powershell trace
       } else if("PSModulePath" %in% names(Sys.getenv())){
         ### OK, now the variable name doesn't make sense anymore but let's be pragmatic
         ### just this once
-        unixCmdStr <- paste0("powershell -command Get-Content -Tail ", tail, " ")
+        unixCmdStr <- paste0("powershell -command Get-Content -Tail ", as.integer(tail), " ")
       } else { ## else, we'll use a sed workaround
         ### thx dcaswell: https://stackoverflow.com/a/18453366
         ### very smart but not very fast for big files
-        unixCmdStr <- paste0("sed -e :a -e '$q;N;", tail + 1,",$D;ba' ")
+        unixCmdStr <- paste0("sed -e :a -e '$q;N;", as.integer(tail + 1),",$D;ba' ")
       }
 
 
     } else {
       ### if unix, tail should be installed hopefully
-      unixCmdStr <- paste0("tail -n ", tail)
+      unixCmdStr <- paste0("tail -n ", as.integer(tail))
     }
   }
 
@@ -208,7 +216,15 @@ bsubsetStr <- function(file = NULL,
 }
 
 addCmdsToPath <- function(){
-  if(.Platform$OS.type == "windows"){
+
+  ### If BDF Environment...
+  if(Sys.getenv("BDF_OSVER") != "" & .Platform$OS.type == "windows"){
+    oldPath <- Sys.getenv("PATH")
+    Sys.setenv(PATH = paste(oldPath, "C:\\Program Files\\Git\\usr\\bin;C:\\Produits\\R\\Rtools\\usr\\bin", sep = ";"))
+
+
+
+  } else if(.Platform$OS.type == "windows"){
   oldPath <- Sys.getenv("PATH")
   # add Rtools / Git / Cygwin to path
   CMD = c('reg query "HKLM\\Software\\R-core\\Rtools" /v InstallPath',
@@ -236,6 +252,7 @@ addCmdsToPath <- function(){
   }
 
   output <- output %>% stats::na.omit() %>% paste(collapse = ";")
+
   if(output == ""){message("### Neither RTools, Git nor Cygwin have been detected.
 ### Please make sure you have another source for the necessary Unix cmds
 ### in your PATH.")}
