@@ -237,28 +237,40 @@ addCmdsToPath <- function(){
   output <- c()
 
   for(ii in 1:length(CMD)){
-    tryCatch(
-      {
-        # check registry for installPaths, extract it and add subdirectories
-        output[ii] <- system(command = CMD[ii], intern = T) %>%
-          stringr::str_subset(pattern = "REG_SZ") %>% stringr::str_split(pattern = "  ", simplify = T) %>%
-          last() %>% paste0(DIR[ii])
-        },
-      error=function(cond) {output[ii] <<- NA
-      },
-      warning=function(cond) {output[ii] <<- NA
-      }
-    )
+    output[ii] <- readReg(CMD = CMD[ii], DIR = DIR[ii], output = NA)
   }
 
   output <- output %>% stats::na.omit() %>% paste(collapse = ";")
 
-  if(output == ""){message("### Neither RTools, Git nor Cygwin have been detected.
+  if(output == ""){
+  message("### Neither RTools, Git nor Cygwin have been detected.
 ### Please make sure you have another source for the necessary Unix cmds
-### in your PATH.")}
+### in your PATH.")
+    }
   Sys.setenv(PATH = paste(oldPath, output, sep = ";"))
   }
 }
+
+readReg <- function(CMD, DIR, output = NA){
+  tryCatch(
+    {
+      # check registry for installPaths, extract it and add subdirectories
+      output <- system(command = CMD, intern = T, ignore.stderr = T) %>%
+        stringr::str_subset(pattern = "REG_SZ") %>% stringr::str_split(pattern = "  ", simplify = T) %>%
+        last() %>% paste0(DIR)
+    },
+    error=function(cond) {
+      output <- NA
+    },
+    warning=function(cond) {
+      output <- NA
+    },
+    finally = {
+      return(output)
+      }
+    )
+}
+
 
 ##
 .onLoad <- function(libname, pkgname) {

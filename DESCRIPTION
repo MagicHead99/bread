@@ -1,6 +1,6 @@
 Package: bread
 Title: Analyze Big Files Without Loading Them in Memory
-Version: 0.1.4
+Version: 0.1.6
 Authors@R: 
     person("Vincent", "Guegan", , "vincent.guegan@banque-france.fr", role = c("aut", "cre"))
 Description: A simple set of wrapper functions for data.table::fread() that allows subsetting or

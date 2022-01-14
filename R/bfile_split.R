@@ -87,7 +87,7 @@ bfile_split <- function(file = NULL,
     df_temp <- do.call(data.table::fread, args_fread)
 
     #print(paste0("file 1 : ", nrow(df_temp)))
-    args_fwrite <- c(x = df_temp,
+    args_fwrite <- c(x = list(df_temp),
                      file = paste0(base_file, "_", stringr::str_pad(1, n_char_num, pad = "0"), ".csv"),
                      args)
 
@@ -106,7 +106,7 @@ bfile_split <- function(file = NULL,
         `colnames<-`(meta_output$colnames)
 
       #print(paste0("file ", ii, " : " , nrow(df_temp)))
-      args_fwrite <- c(x = df_temp,
+      args_fwrite <- c(x = list(df_temp),
                        file = paste0(base_file, "_", stringr::str_pad(ii, n_char_num, pad = "0"), ".csv"),
                        args)
       do.call(data.table::fwrite, args_fwrite)
@@ -124,7 +124,7 @@ bfile_split <- function(file = NULL,
       `colnames<-`(meta_output$colnames)
     #print(paste0("file ", by_nfiles, " : " , nrow(df_temp)))
 
-    args_fwrite <- c(x = df_temp,
+    args_fwrite <- c(x = list(df_temp),
                      file = paste0(base_file, "_",
                                    stringr::str_pad(by_nfiles, n_char_num, pad = "0"),
                                    ".csv"),
@@ -163,7 +163,7 @@ bfile_split <- function(file = NULL,
     df_temp <- do.call(data.table::fread, args_fread)
     print(paste0(1, " - - ", nrow(df_temp)))
 
-    args_fwrite <- c(x = df_temp,
+    args_fwrite <- c(x = list(df_temp),
                      file = paste0(base_file, "_",
                                    stringr::str_pad(1, n_char_num, pad = "0"), ".csv"),
                      args)
@@ -183,7 +183,7 @@ bfile_split <- function(file = NULL,
         `colnames<-`(meta_output$colnames)
       print(paste0(ii, " - - ", nrow(df_temp)))
 
-      args_fwrite <- c(x = df_temp,
+      args_fwrite <- c(x = list(df_temp),
                        file = paste0(base_file, "_", stringr::str_pad(ii, n_char_num, pad = "0"), ".csv"),
                        args)
       do.call(data.table::fwrite, args_fwrite)
@@ -200,7 +200,7 @@ bfile_split <- function(file = NULL,
         `colnames<-`(meta_output$colnames)
       print(paste0(nfiles + 1, " - - ", nrow(df_temp)))
 
-      args_fwrite <- c(x = df_temp,
+      args_fwrite <- c(x = list(df_temp),
                        file = paste0(base_file, "_",
                                      stringr::str_pad((nfiles + 1), n_char_num, pad = "0"), ".csv"),
                        args)
@@ -228,7 +228,6 @@ bfile_split <- function(file = NULL,
     #### building the unix str
     unixCmdStr <- bselectStr(file = file,
                              colnums = colnums,
-                             meta_output = meta_output,
                              ...) %>%
       paste(qfile)
 
@@ -267,11 +266,10 @@ bfile_split <- function(file = NULL,
       df_temp <- bfilter(file = file,
                          patterns = patt_escaped,
                          filtered_columns = colnums,
-                         meta_output = meta_output,
                          ...)
       ###### dropping empty df, except if argument drop_empty_files is T
       if(nrow(df_temp) > 0 | drop_empty_files == F){
-        args_fwrite <- c(x = df_temp,
+        args_fwrite <- c(x = list(df_temp),
                          file = paste0(base_file, "_", file_ext, ".csv"),
                          args)
         do.call(data.table::fwrite, args_fwrite)
@@ -283,9 +281,9 @@ bfile_split <- function(file = NULL,
         skipped_files <- skipped_files + 1
       }
     }
-
+    print(paste0("Generated ", nfiles - skipped_files, " files ! (", skipped_files," files skipped)"))
   }
-  print(paste0("Generated ", nfiles - skipped_files, " files ! (", skipped_files," files skipped"))
+
 }
 
 
