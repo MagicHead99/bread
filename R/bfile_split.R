@@ -94,7 +94,7 @@ bfile_split <- function(file = NULL,
     do.call(data.table::fwrite, args_fwrite)
 
     print(paste0("File ", 1, " of ",
-                 by_nfiles, " : OK!"))
+                 by_nfiles, " : OK! (", nrow(df_temp)," rows)"))
 
     #### chunks 2 to n-1
     for(ii in 2:(by_nfiles - 1)){
@@ -111,7 +111,7 @@ bfile_split <- function(file = NULL,
                        args)
       do.call(data.table::fwrite, args_fwrite)
       print(paste0("File ", ii, " of ",
-                   by_nfiles, " : OK!"))
+                   by_nfiles, " : OK! (", nrow(df_temp)," rows)"))
     }
 
 
@@ -131,7 +131,7 @@ bfile_split <- function(file = NULL,
                      args)
     do.call(data.table::fwrite, args_fwrite)
     print(paste0("File ", by_nfiles, " of ",
-                 by_nfiles, " : OK!"))
+                 by_nfiles, " : OK! (", nrow(df_temp)," rows)"))
   }
 
   ### 2. Splitting by number of rows
