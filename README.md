@@ -14,7 +14,7 @@ bread functions allow to analyze a 50Gb file with a computer with 8Gb of memory 
 
 ## Best practices
 There are other (better) ways to do that, like - for example - loading a large file in a SQLite database. 
-Or not working on huge csv files in the first place. But I happened to use those commands often in order to exploire data. 
+Or not working on huge csv files in the first place. But I happened to use those commands often in order to explore data. 
 If you have to, you hopefully won't have to delve right away into the fascinating grammar of Unix commands.
 
 ## Pre-requisites
