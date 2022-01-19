@@ -13,8 +13,10 @@
 #' @param by_nrows Numeric. Number of rows composing the new split files. The last one may be smaller, containing only the remainder.
 #' @param by_columns Vector of strings or numeric. Indicates either the names or index number of the columns whose combinations of unique values will be used to split the files.
 #' @param drop_empty_files Logical. Defaults to TRUE. Used only with the "by_column" argument. If changed to FALSE, empty files may be created.
+#' @param write_sep One character-length string. Will be provided to data.table::fwrite() for writing the output. If not provided, the delimiter will be guessed from the input file with the bsep() function
+#' @param write_dir String. Path to the output directory. By default, it will be the working directory.
 #' @param meta_output List. Optional. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.
-#' @param ... Arguments that must be passed to data.table::fread() like "sep" and "dec".
+#' @param ... Arguments that must be passed to data.table::fread() like "sep=" and "dec=".
 #' @keywords big file split allocate vector size
 #'
 #' @return Creates a number of csv files from the original larger file
@@ -33,6 +35,8 @@
 #' ## to bfile_split()
 #' meta <- bmeta(file = file)
 #' bfile_split(file = file, by_nrows = 5, meta_output = meta)
+#' ## write_sep can be used to write the output files with a different delimiters than the input file
+#' bfile_split(file = file, by_nrows = 5, write_sep = "*")
 #' }
 #' }
 #' @import dplyr
@@ -41,6 +45,8 @@
 bfile_split <- function(file = NULL,
                         by_nfiles, by_nrows,
                         by_columns, drop_empty_files = T,
+                        write_sep = NA,
+                        write_dir = NULL,
                         meta_output = NULL,
                         ...){
   args = list(...)
@@ -61,13 +67,25 @@ bfile_split <- function(file = NULL,
     stop("Need to provide one of the arguments by_nfiles=, by_nrows= or by_columns=.")
   }
   ## Will be used as the basis of the name the future splitted files
-  base_file <- tools::file_path_sans_ext(file)
+  if(!is.null(write_dir)){
+    base_file <- paste(write_dir, tools::file_path_sans_ext(basename(file)), sep = "/")
+  } else {
+    base_file <- tools::file_path_sans_ext(basename(file))
+  }
 
   ## nrow, ncol and colnames are necessary
   if(is.null(meta_output)){
     print("Counting rows...")
     meta_output = bmeta(file, ...)
     print(paste0(meta_output$nrows, " rows found !"))
+  }
+
+  ## output delimiter
+  if(!is.na(write_sep) & nchar(write_sep) > 1){
+    stop(paste("Output delimiter needs to 1 character long: ", write_sep, " is not correct."))
+  }
+  if(is.na(write_sep)){
+    write_sep <- bsep(file)
   }
 
   ### 1. Splitting by number of files
@@ -89,6 +107,7 @@ bfile_split <- function(file = NULL,
     #print(paste0("file 1 : ", nrow(df_temp)))
     args_fwrite <- c(x = list(df_temp),
                      file = paste0(base_file, "_", stringr::str_pad(1, n_char_num, pad = "0"), ".csv"),
+                     sep = write_sep,
                      args)
 
     do.call(data.table::fwrite, args_fwrite)
@@ -108,6 +127,7 @@ bfile_split <- function(file = NULL,
       #print(paste0("file ", ii, " : " , nrow(df_temp)))
       args_fwrite <- c(x = list(df_temp),
                        file = paste0(base_file, "_", stringr::str_pad(ii, n_char_num, pad = "0"), ".csv"),
+                       sep = write_sep,
                        args)
       do.call(data.table::fwrite, args_fwrite)
       print(paste0("File ", ii, " of ",
@@ -128,6 +148,7 @@ bfile_split <- function(file = NULL,
                      file = paste0(base_file, "_",
                                    stringr::str_pad(by_nfiles, n_char_num, pad = "0"),
                                    ".csv"),
+                     sep = write_sep,
                      args)
     do.call(data.table::fwrite, args_fwrite)
     print(paste0("File ", by_nfiles, " of ",
@@ -166,6 +187,7 @@ bfile_split <- function(file = NULL,
     args_fwrite <- c(x = list(df_temp),
                      file = paste0(base_file, "_",
                                    stringr::str_pad(1, n_char_num, pad = "0"), ".csv"),
+                     sep = write_sep,
                      args)
     do.call(data.table::fwrite, args_fwrite)
     print(paste0("File ", 1, " of ",
@@ -185,6 +207,7 @@ bfile_split <- function(file = NULL,
 
       args_fwrite <- c(x = list(df_temp),
                        file = paste0(base_file, "_", stringr::str_pad(ii, n_char_num, pad = "0"), ".csv"),
+                       sep = write_sep,
                        args)
       do.call(data.table::fwrite, args_fwrite)
       print(paste0("File ", ii, " of ",
@@ -203,6 +226,7 @@ bfile_split <- function(file = NULL,
       args_fwrite <- c(x = list(df_temp),
                        file = paste0(base_file, "_",
                                      stringr::str_pad((nfiles + 1), n_char_num, pad = "0"), ".csv"),
+                       sep = write_sep,
                        args)
       do.call(data.table::fwrite, args_fwrite)
       print(paste0("File ", nfiles, " of ",
@@ -271,6 +295,7 @@ bfile_split <- function(file = NULL,
       if(nrow(df_temp) > 0 | drop_empty_files == F){
         args_fwrite <- c(x = list(df_temp),
                          file = paste0(base_file, "_", file_ext, ".csv"),
+                         sep = write_sep,
                          args)
         do.call(data.table::fwrite, args_fwrite)
         print(paste0("File ", ii, " of ",
