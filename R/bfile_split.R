@@ -14,7 +14,7 @@
 #' @param by_columns Vector of strings or numeric. Indicates either the names or index number of the columns whose combinations of unique values will be used to split the files.
 #' @param drop_empty_files Logical. Defaults to TRUE. Used only with the "by_column" argument. If changed to FALSE, empty files may be created.
 #' @param write_sep One character-length string. Will be provided to data.table::fwrite() for writing the output. If not provided, the delimiter will be guessed from the input file with the bsep() function
-#' @param write_dir String. Path to the output directory. By default, it will be the working directory.
+#' @param write_dir String. Path to the output directory. By default, it will be the working directory. If the directory doesn't exist, it will be created.
 #' @param meta_output List. Optional. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.
 #' @param ... Arguments that must be passed to data.table::fread() like "sep=" and "dec=".
 #' @keywords big file split allocate vector size
@@ -69,6 +69,9 @@ bfile_split <- function(file = NULL,
   ## Will be used as the basis of the name the future splitted files
   if(!is.null(write_dir)){
     base_file <- paste(write_dir, tools::file_path_sans_ext(basename(file)), sep = "/")
+    if(!file.exists(write_dir)){
+      dir.create(write_dir)
+    }
   } else {
     base_file <- tools::file_path_sans_ext(basename(file))
   }
