@@ -18,10 +18,10 @@ A string
 }
 \description{
 The function reads the first row and tests the following common separators by default:
-\code{";" "\\t" " " "|" ":" ","}
+\code{';' '\\t' ' ' '|' ':' ','}
 }
 \examples{
-file <- system.file("extdata", "test.csv", package = "bread")
+file <- system.file('extdata', 'test.csv', package = 'bread')
 ## Checking the delimiter on the first 12 rows, including headers
 bsep(file = file, ntries = 12)
 }

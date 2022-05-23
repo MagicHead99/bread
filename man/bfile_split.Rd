@@ -25,15 +25,15 @@ bfile_split(
 
 \item{by_columns}{Vector of strings or numeric. Indicates either the names or index number of the columns whose combinations of unique values will be used to split the files.}
 
-\item{drop_empty_files}{Logical. Defaults to TRUE. Used only with the "by_column" argument. If changed to FALSE, empty files may be created.}
+\item{drop_empty_files}{Logical. Defaults to TRUE. Used only with the 'by_column' argument. If changed to FALSE, empty files may be created.}
 
 \item{write_sep}{One character-length string. Will be provided to data.table::fwrite() for writing the output. If not provided, the delimiter will be guessed from the input file with the bsep() function}
 
-\item{write_dir}{String. Path to the output directory. By default, it will be the working directory.}
+\item{write_dir}{String. Path to the output directory. By default, it will be the working directory. If the directory doesn"t exist, it will be created.}
 
 \item{meta_output}{List. Optional. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.}
 
-\item{...}{Arguments that must be passed to data.table::fread() like "sep=" and "dec=".}
+\item{...}{Arguments that must be passed to data.table::fread() like 'sep=' and 'dec='.}
 }
 \value{
 Creates a number of csv files from the original larger file
@@ -45,18 +45,18 @@ This function helps splitting a big csv file in smaller csv files using one of t
 \item by_nfiles: The user decide the number of files created with the rows equally distributed
 \item by_columns: The file will be split by the combinations of unique values in the columns chosen by the user
 Like all other functions in the bread package, this is achieved using Unix commands
-that allow opening, reading and splitting big files that wouldn't fit in memory
-(The goal being to help with the "cannot allocate vector of size" error).
+that allow opening, reading and splitting big files that wouldn"t fit in memory
+(The goal being to help with the 'cannot allocate vector of size' error).
 }
 }
 \examples{
 \donttest{
 \dontrun{
-file <- system.file("extdata", "test.csv", package = "bread")
+file <- system.file('extdata', 'test.csv', package = 'bread')
 ## Filtering on 2 columns, using regex.
 bfile_split(file = file, by_nrows = 5)
 bfile_split(file = file, by_nfiles = 3)
-bfile_split(file = file, by_columns = c("YEAR", "COLOR"))
+bfile_split(file = file, by_columns = c('YEAR', 'COLOR'))
 ## For very big files with several million rows, the bmeta() function takes
 ##a long time to count the rows without loading the file in memory.
 ## Best practice is to save the result of bmeta() in a variable and provide it
@@ -64,7 +64,7 @@ bfile_split(file = file, by_columns = c("YEAR", "COLOR"))
 meta <- bmeta(file = file)
 bfile_split(file = file, by_nrows = 5, meta_output = meta)
 ## write_sep can be used to write the output files with a different delimiters than the input file
-bfile_split(file = file, by_nrows = 5, write_sep = "*")
+bfile_split(file = file, by_nrows = 5, write_sep = '*')
 }
 }
 }

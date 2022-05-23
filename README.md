@@ -9,7 +9,7 @@ the "cannot allocate vector of size" error.)
 bread functions allow to analyze a 50Gb file with a computer with 8Gb of memory and:
  - split it in several smaller ones by number of rows or by values in one or many columns
  - count the number of rows
- - subset it by row number or column values
+ - subset it by row number or column values (string pattern or numerical value)
  - select only the relevant variables/columns
 
 ## Best practices

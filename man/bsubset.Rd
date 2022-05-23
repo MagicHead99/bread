@@ -24,7 +24,7 @@ bsubset(
 
 \item{last_row}{Numeric. Last row of the portion of the file to subset.}
 
-\item{...}{Arguments that must be passed to data.table::fread() like "sep".}
+\item{...}{Arguments that must be passed to data.table::fread() like 'sep'.}
 }
 \value{
 A dataframe containing the subsetted rows
@@ -32,12 +32,12 @@ A dataframe containing the subsetted rows
 \description{
 Simple wrapper for data.table::fread() allowing to subset rows of data from a file
 with the Unix sed or awk commands. This method is useful if you want to load a file
-too large for your available memory (and encounter the "cannot allocate vector of size" error).
+too large for your available memory (and encounter the 'cannot allocate vector of size' error).
 You need to input the index number of the first and last rows you want to load in memory with fread(),
 or alternatively use either the head or tail arguments to subset the first or last rows of the file.
 }
 \examples{
-file <- system.file("extdata", "test.csv", package = "bread")
+file <- system.file('extdata', 'test.csv', package = 'bread')
 ## Head or Tail... for the first n or last n rows
 bsubset(file = file, head = 5)
 ## Subset from the middle of a file

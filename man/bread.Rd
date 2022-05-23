@@ -15,6 +15,9 @@ bread(
   patterns = NULL,
   filtered_columns = NULL,
   fixed = FALSE,
+  range_min = NULL,
+  range_max = NULL,
+  numrange_columns = NULL,
   ...
 )
 }
@@ -39,7 +42,13 @@ bread(
 
 \item{fixed}{Logical. If TRUE, pattern is a string to be matched as is. Overrides all conflicting arguments.}
 
-\item{...}{Arguments that must be passed to data.table::fread() like "sep" or "dec".}
+\item{range_min}{Vector of numeric. One or several minimal values used to filter (inclusively, as in superior OR EQUAL to that value) the data from the input file. Each element of the vector should correspond to the numrange_column to be filtered.}
+
+\item{range_max}{Vector of numeric. One or several maximal values used to filter (inclusively, as in inferior OR EQUAL to that value) the data from the input file. Each element of the vector should correspond to the numrange_column to be filtered.}
+
+\item{numrange_columns}{Vector of strings or numeric. The columns to be filtered should be indicated through their names or their index number. Each element of the vector should correspond to the range_min and range_man values with which it will be filtered.}
+
+\item{...}{Arguments that must be passed to data.table::fread() like 'sep' or 'dec'.}
 }
 \value{
 A data frame with the selected columns and the subsetted and filtered data
@@ -49,8 +58,8 @@ Wrapper for data.table::fread() simplifying the use of Unix commands like grep, 
 on a data file \emph{before} loading it in memory. The Unix commands are automatically generated
 from the arguments.
 This is useful if you want to load a big file too large for your available memory
-(and encounter the "cannot allocate vector of size" error) and know you can work on a
-subsample. "b" stands for "big file".
+(and encounter the 'cannot allocate vector of size' error) and know you can work on a
+subsample. 'b' stands for 'big file'.
 This function allows to subset rows by their index number, select columns and filter
 with a pattern.
 }
@@ -67,29 +76,35 @@ colnums are provided, colnums will be prefered.
 \item filters the data selected so far with a pattern by column (with grep). The
 columns to be filtered should be indicated through their names or their index
 number. Each element of the vector should correspond to the pattern with which
-it will be filtered.#'
+it will be filtered.
+\item filters (inclusively, as in inferior/superior OR EQUAL) the data selected
+so far by numerical value on a different set of provided columns.
 }
 }
 \section{Warning}{
 
 Best practice would probably be to load the big file in a SQL database or something.
 Or not working on huge CSV files in the first place.
-But if you have to, you hopefully won't have to delve into the fascinating grammar of
+But if you have to, you hopefully won"t have to delve into the fascinating grammar of
 Unix commands.
 }
 
 \examples{
-file <- system.file("extdata", "test.csv", package = "bread")
+file <- system.file('extdata', 'test.csv', package = 'bread')
 ## Select the columns numbered 1 and 3
 bread(file = file, colnums = c(1,3))
-## Select the columns named "YEAR" and "PRICE", then filter to keep only the
-## value "2022" in column "YEAR"
+## Select the columns named 'YEAR' and 'PRICE', then filter to keep only the
+## value '2022' in column 'YEAR'
+bread(file = file, colnames = c('YEAR', 'PRICE'),
+      patterns = 2002, filtered_columns = 'YEAR')
+## Select the columns names 'YEAR' and 'PRICE', then filter to keep only values
+## superior or equal to 2004 in YEAR and to 2000 in PRICE
 bread(file = file, colnames = c("YEAR", "PRICE"),
-      patterns = 2002, filtered_columns = "YEAR")
-## Subset to keep only the rows 10 to 18, select the columns named "YEAR"
-## and "COLOR" then filter to keep only the value "red" in column "COLOR"
-bread(file = file, colnames = c("YEAR", "COLOR"),
-      patterns = "red", filtered_columns = "COLOR",
+      range_min = c(2004,2000), numrange_columns = c(1,3))
+## Subset to keep only the rows 10 to 18, select the columns named 'YEAR'
+## and 'COLOR' then filter to keep only the value 'red' in column 'COLOR'
+bread(file = file, colnames = c('YEAR', 'COLOR'),
+      patterns = 'red', filtered_columns = 'COLOR',
       first_row = 10, last_row = 18)
 }
 \keyword{allocate}

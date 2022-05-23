@@ -13,7 +13,7 @@ bselect(file = NULL, colnames = NULL, colnums = NULL, ...)
 
 \item{colnums}{Vector of numeric. Columns index numbers.}
 
-\item{...}{Arguments that must be passed to data.table::fread() like "sep" or "dec".}
+\item{...}{Arguments that must be passed to data.table::fread() like 'sep' or 'dec'.}
 }
 \value{
 A dataframe with the selected columns
@@ -21,14 +21,14 @@ A dataframe with the selected columns
 \description{
 Simple wrapper for data.table::fread() allowing to select columns of data from a file
 with the Unix cut command. This method is useful if you want to load a file
-too large for your available memory (and encounter the "cannot allocate vector of size" error).
+too large for your available memory (and encounter the 'cannot allocate vector of size' error).
 }
 \examples{
-file <- system.file("extdata", "test.csv", package = "bread")
+file <- system.file('extdata', 'test.csv', package = 'bread')
 ## Select the columns numbered 1 and 3
 bselect(file = file, colnums = c(1,3))
-## Select the columns named "PRICE" and "COLOR"
-bselect(file = file, colnames = c("PRICE", "COLOR"))
+## Select the columns named 'PRICE' and 'COLOR'
+bselect(file = file, colnames = c('PRICE', 'COLOR'))
 }
 \keyword{allocate}
 \keyword{big}
