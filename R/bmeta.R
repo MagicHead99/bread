@@ -18,6 +18,7 @@
 
 bmeta <- function(file = NULL, ...){
   args <- list(...)
+
   output = NULL
 
   output$nrows <- bnrow(file)

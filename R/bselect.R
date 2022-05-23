@@ -24,10 +24,18 @@ bselect <- function(file = NULL,
                     ...){
   args <- list(...)
 
+  ## Quoting the file to prevent errors due to special characters like ")"
+  ## according to environment
+  if(.Platform$OS.type == "windows"){
+    qfile <- shQuote(file, type = "cmd2")
+  } else if(.Platform$OS.type == "unix"){
+    qfile <- shQuote(file)
+  }
+
   unixCmdStr <- bselectStr(file = file,
                            colnames = colnames, colnums = colnums,
                            ...) %>%
-    paste(file)
+    paste(qfile)
   args <- c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
   return(df)

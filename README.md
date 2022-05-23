@@ -14,15 +14,13 @@ bread functions allow to analyze a 50Gb file with a computer with 8Gb of memory 
 
 ## Best practices
 There are other (better) ways to do that, like - for example - loading a large file in a SQLite database. 
-Or not working on huge csv files in the first place. But I happened to use those commands often in order to exploire data. 
+Or not working on huge csv files in the first place. But I happened to use those commands often in order to explore data. 
 If you have to, you hopefully won't have to delve right away into the fascinating grammar of Unix commands.
 
 ## Pre-requisites
-bread makes heavy use of Unix commands like grep, sed, wc and cut. They are available by default in a Unix environments.
-For Windows, you need to install those commands externally and simulate a Unix environment and make sure that the executables 
-are in the Windows PATH variable.
-To my knowledge, the simplest way is to install RTools (the bin folder will be added automatically to the PATH). Git, Cygwin, 
-Mingw64 are other strong contenders (as long as the PATH is correctly setup.)
+bread makes heavy use of Unix commands like grep, sed, wc and cut. They are available by default in all Unix environments.
+For Windows, you need to install those commands externally in order to simulate a Unix environment and make sure that the executables are in the Windows PATH variable.
+To my knowledge, the simplest ways are to install RTools, Git or Cygwin. If they have been correctly installed (with the expected registry entries), they will be detected on loading the package and the correct directories will be added automatically to the PATH.
 
 ## Installation
 ```r
