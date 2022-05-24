@@ -194,6 +194,7 @@ bread <- function(file = NULL,
   ### Using the Unix Cmd now
   args <- c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
+  #print(unixCmdStr)
   ### Adding back ColNames (sed & awk & grep lose them)
   colnames(df) <- meta_output$colnames
   ## filtered_column can be a vector of string colnames or a vector of col indexes

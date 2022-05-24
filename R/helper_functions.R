@@ -130,9 +130,16 @@ bnumrangeStr <- function(file = NULL,
     }
   }
 
+  ### win
   ### fread(cmd='awk -F; "{ if (NR == 1 || ($1 >= 2006 && $3 > 2000)) print }" .../extdata/test.csv')
+  ### ubuntu
+  ### awk -F';' '{if (NR == 1 || $1 == 2006 && $3 > 2000) print}' /home/zzz/R/x86_64-pc-linux-gnu-library/4.0/bread/extdata/test.csv
 
+  if(.Platform$OS.type == "windows"){
   unixCmdStr <- paste0('awk -F', sepz, ' "{ if (NR == 1 || (', numrangeStr, ')) print }" ')
+  } else {
+    unixCmdStr <- paste0("awk -F'", sepz, "' '{ if (NR == 1 || (", numrangeStr, ")) print }' ")
+  }
   #print(unixCmdStr)
   return(unixCmdStr)
 }

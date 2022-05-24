@@ -57,6 +57,7 @@ bnumrange <- function(file = NULL,
                              range_min = range_min, range_max = range_max,
                              numrange_columns = numrange_columns) %>%
     paste(qfile)
+  #print(unixCmdStr)
   args <-  c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
   colnames(df) <- meta_output$colnames
