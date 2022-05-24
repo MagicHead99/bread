@@ -6,12 +6,12 @@
 #' argument to save time. Counting rows in very large files can take some time.
 #'
 #' @param file String. Name or full path to a file compatible with data.table::fread()
-#' @param ... Arguments that must be passed to data.table::fread() like "sep".
+#' @param ... Arguments that must be passed to data.table::fread() like 'sep'.
 #'
 #' @return A list of 2
 #'
 #' @examples
-#' file <- system.file("extdata", "test.csv", package = "bread")
+#' file <- system.file('extdata', 'test.csv', package = 'bread')
 #' ## Filtering on 2 columns, using regex.
 #' meta_output <- bmeta(file = file)
 #' @export

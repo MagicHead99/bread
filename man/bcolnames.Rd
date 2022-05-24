@@ -9,7 +9,7 @@ bcolnames(file = NULL, ...)
 \arguments{
 \item{file}{String. Name or full path to a file compatible with data.table::fread()}
 
-\item{...}{Arguments that must be passed to data.table::fread() like "sep".}
+\item{...}{Arguments that must be passed to data.table::fread() like 'sep'.}
 }
 \value{
 A character vector
@@ -17,10 +17,10 @@ A character vector
 \description{
 Simply reads the first line of a file with data.table::fread and the head Unix command.
 This allows analyzing big files that would not fit in memory (and cause an error
-such as "cannot allocate vector of size").
+such as 'cannot allocate vector of size').
 }
 \examples{
-file <- system.file("extdata", "test.csv", package = "bread")
+file <- system.file('extdata', 'test.csv', package = 'bread')
 ## Retrieving the column names
 bcolnames(file = file)
 }

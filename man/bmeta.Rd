@@ -9,7 +9,7 @@ bmeta(file = NULL, ...)
 \arguments{
 \item{file}{String. Name or full path to a file compatible with data.table::fread()}
 
-\item{...}{Arguments that must be passed to data.table::fread() like "sep".}
+\item{...}{Arguments that must be passed to data.table::fread() like 'sep'.}
 }
 \value{
 A list of 2
@@ -21,7 +21,7 @@ The output can be saved in a variable and provided in the meta_output
 argument to save time. Counting rows in very large files can take some time.
 }
 \examples{
-file <- system.file("extdata", "test.csv", package = "bread")
+file <- system.file('extdata', 'test.csv', package = 'bread')
 ## Filtering on 2 columns, using regex.
 meta_output <- bmeta(file = file)
 }

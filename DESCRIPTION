@@ -1,13 +1,13 @@
 Package: bread
 Title: Analyze Big Files Without Loading Them in Memory
-Version: 0.1.7
+Version: 0.2.1
 Authors@R: 
     person("Vincent", "Guegan", , "vincent.guegan@banque-france.fr", role = c("aut", "cre"))
 Description: A simple set of wrapper functions for data.table::fread() that allows subsetting or
     filtering rows and selecting columns of table-formatted files too large for the available RAM.
     'b stands for 'big files'. The package is using Unix commands like grep, cut and sed 
     through (hopefully) intuitive parameters.
-    bread makes heavy use of Unix commands like grep, sed, wc and cut. They are available 
+    bread makes heavy use of Unix commands like grep, sed, wc, awk and cut. They are available 
     by default in all Unix environments.
     For Windows, you need to install those commands externally in order to simulate a 
     Unix environment and make sure that the executables are in the Windows PATH variable.

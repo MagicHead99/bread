@@ -13,12 +13,12 @@ bnrow(file = NULL)
 A numeric
 }
 \description{
-Counts the number of rows using data.table::fread() and the "wc" Unix command.
+Counts the number of rows using data.table::fread() and the 'wc' Unix command.
 This allows analyzing big files that would not fit in memory (and cause an error
-such as "cannot allocate vector of size").
+such as 'cannot allocate vector of size').
 }
 \examples{
-file <- system.file("extdata", "test.csv", package = "bread")
+file <- system.file('extdata', 'test.csv', package = 'bread')
 ## Counting rows (almost like the band)
 bnrow(file = file)
 }
