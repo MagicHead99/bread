@@ -93,7 +93,7 @@ bread <- function(file = NULL,
 
   unixCmdVec <- NULL
 
-    ### 1. subset / sed
+  ### 1. subset / sed
   if(!is.null(first_row) | !is.null(last_row) | !is.null(head) | !is.null(tail) ){
     unixCmdVec <- append(unixCmdVec,
                          bsubsetStr(file = file,
@@ -120,11 +120,11 @@ bread <- function(file = NULL,
     if(!is.null(numrange_columns)){
       if(is.null(colnames)){
         colnames <- meta_output$colnames[colnums]
-        }
+      }
 
-    else {
+      else {
         colnums <- match(colnames, meta_output$colnames)
-    }
+      }
       if(is.numeric(numrange_columns)){
         numrange_names <- meta_output$colnames[numrange_columns]
         numrange_index <- numrange_columns
@@ -134,7 +134,7 @@ bread <- function(file = NULL,
       }
 
 
-      }
+    }
 
     if(is.null(colnames)){
       if(!is.null(colnums)){
@@ -156,12 +156,21 @@ bread <- function(file = NULL,
       }
     }
     if(!is.null(numrange_columns) & !is.null(numrange_index)){
-    if(!all(numrange_index %in% colnums)){
-      stop('Cannot filter by numrange on missing column')
-    } else {
-      numrange_columns <- match(numrange_names, meta_output$colnames)
-    }}
+      if(!all(numrange_index %in% colnums)){
+        stop('Cannot filter by numrange on missing column')
+      } else {
+        numrange_columns <- match(numrange_names, meta_output$colnames)
+      }}
   }
+
+  ### if using sed to filter by row number then awk to filter by value, it removes the first row and then
+  ### awk mistakenly prints the first row without filtering, so we change the NR to 0
+  if((!is.null(first_row) | !is.null(last_row) | !is.null(head) | !is.null(tail)) & (!is.null(range_min) | !is.null(range_max) | !is.null(numrange_columns))){
+    sed_first_row_RN <- 0
+  } else {
+    sed_first_row_RN <- 1
+  }
+
   ### 3. filter / grep
   if(!is.null(patterns) | !is.null(filtered_columns)){
     patterns <- as.character(patterns)
@@ -181,6 +190,7 @@ bread <- function(file = NULL,
                          bnumrangeStr(file = file,
                                       range_min = range_min, range_max = range_max,
                                       numrange_columns = numrange_columns,
+                                      sed_first_row_RN = sed_first_row_RN,
                                       ...))
   }
 
@@ -191,24 +201,31 @@ bread <- function(file = NULL,
     unixCmdVec <- paste(unixCmdVec[-1], collapse = '| ')
     unixCmdStr <- paste(unixCmdStr, unixCmdVec, sep = '| ')
   }
+
   ### Using the Unix Cmd now
   args <- c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
   #print(unixCmdStr)
   ### Adding back ColNames (sed & awk & grep lose them)
-  colnames(df) <- meta_output$colnames
-  ## filtered_column can be a vector of string colnames or a vector of col indexes
-  ## We prefer names for dplyr::filter()
-  if(is.numeric(filtered_columns)){
-    filtered_columns <- meta_output$colnames[filtered_columns]
-  }
-  if(is.null(filtered_columns) & !is.null(patterns)){
-    warning("*** Filtering according to patterns but no filtered_columns entered.\nData has been filtered\n
-            but there might be some false positives. ***")
-  } else if(!is.null(filtered_columns) & !is.null(patterns)){
-    for(ii in 1:length(filtered_columns)){
-      df <- df %>% filter(stringr::str_detect(!!sym(filtered_columns[ii]), patterns[ii]))
+  if(ncol(df) > 0){
+    colnames(df) <- meta_output$colnames
+
+    ## filtered_column can be a vector of string colnames or a vector of col indexes
+    ## We prefer names for dplyr::filter()
+    if(is.numeric(filtered_columns)){
+      filtered_columns <- meta_output$colnames[filtered_columns]
     }
+    if(is.null(filtered_columns) & !is.null(patterns)){
+      warning("*** Filtering according to patterns but no filtered_columns entered.\nData has been filtered\n
+            but there might be some false positives. ***")
+    } else if(!is.null(filtered_columns) & !is.null(patterns)){
+      for(ii in 1:length(filtered_columns)){
+        df <- df %>% filter(stringr::str_detect(!!sym(filtered_columns[ii]), patterns[ii]))
+      }
+    }
+    return(df)
+  } else {
+    print("*** Range selection returned an empty data.frame ***")
+    return(df)
   }
-  return(df)
 }
