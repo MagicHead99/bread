@@ -54,7 +54,7 @@ bread(
 A data frame with the selected columns and the subsetted and filtered data
 }
 \description{
-Wrapper for data.table::fread() simplifying the use of Unix commands like grep, cut, awk and sed
+Wrapper for data.table::fread() simplifying the use of Unix commands like 'grep', 'cut', 'awk' and 'sed'
 on a data file \emph{before} loading it in memory. The Unix commands are automatically generated
 from the arguments.
 This is useful if you want to load a big file too large for your available memory
@@ -67,18 +67,18 @@ with a pattern.
 You can mix and match the row subsetting, the filtering by value and the selecting of columns.
 In order, the function:
 \enumerate{
-\item subsets the rows by their numbers (with sed & awk). You need to input the index
+\item subsets the rows by their numbers (with 'sed' & 'awk'). You need to input the index
 number of the first and last rows you want to load in memory with fread(),
 or alternatively use either the head or tail arguments to subset the first or
 last rows of the file.
-\item selects columns by index number or name (with cut). If both colnames and
+\item selects columns by index number or name (with 'cut'). If both colnames and
 colnums are provided, colnums will be prefered.
-\item filters the data selected so far with a pattern by column (with grep). The
+\item filters the data selected so far with a pattern by column (with 'grep'). The
 columns to be filtered should be indicated through their names or their index
 number. Each element of the vector should correspond to the pattern with which
 it will be filtered.
 \item filters (inclusively, as in inferior/superior OR EQUAL) the data selected
-so far by numerical value on a different set of provided columns.
+so far by numerical value on a different set of provided columns with the 'sed' command.
 }
 }
 \section{Warning}{
