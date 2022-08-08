@@ -1,8 +1,8 @@
 #' Pre-filters a data file using column numerical range before loading it in memory
 #'
 #' Simple wrapper for data.table::fread() allowing to filter data by numerical value
-#' from a file #' with the Unix awk command. This method is useful if you want to
-#' load a file #' too large for your available memory (and encounter
+#' from a file with the Unix 'awk' command. This method is useful if you want to
+#' load a file too large for your available memory (and encounter
 #' the 'cannot allocate vector of size' error #' for example).
 #'
 #' @section Warning: The value comparisons are inclusive, meaning inferior/superior OR EQUAL

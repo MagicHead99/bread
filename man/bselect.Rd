@@ -20,7 +20,7 @@ A dataframe with the selected columns
 }
 \description{
 Simple wrapper for data.table::fread() allowing to select columns of data from a file
-with the Unix cut command. This method is useful if you want to load a file
+with the Unix 'cut' command. This method is useful if you want to load a file
 too large for your available memory (and encounter the 'cannot allocate vector of size' error).
 }
 \examples{

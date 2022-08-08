@@ -1,7 +1,7 @@
 #' Pre-subsets rows of a data file by index number before loading it in memory
 #'
 #' Simple wrapper for data.table::fread() allowing to subset rows of data from a file
-#' with the Unix sed or awk commands. This method is useful if you want to load a file
+#' with the Unix 'sed' or 'awk' commands. This method is useful if you want to load a file
 #' too large for your available memory (and encounter the 'cannot allocate vector of size' error).
 #' You need to input the index number of the first and last rows you want to load in memory with fread(),
 #' or alternatively use either the head or tail arguments to subset the first or last rows of the file.

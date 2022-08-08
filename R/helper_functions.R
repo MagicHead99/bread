@@ -47,6 +47,7 @@ bfilterStr <- function(file = NULL,
 bnumrangeStr <- function(file = NULL,
                          range_min = NULL, range_max = NULL,
                          numrange_columns = NULL,
+                         sed_first_row_RN = 1,
                          ...){
 
   args = list(...)
@@ -136,9 +137,9 @@ bnumrangeStr <- function(file = NULL,
   ### awk -F';' '{if (NR == 1 || $1 == 2006 && $3 > 2000) print}' /home/zzz/R/x86_64-pc-linux-gnu-library/4.0/bread/extdata/test.csv
 
   if(.Platform$OS.type == "windows"){
-  unixCmdStr <- paste0('awk -F', sepz, ' "{ if (NR == 1 || (', numrangeStr, ')) print }" ')
+  unixCmdStr <- paste0('awk -F', sepz, ' "{ if (NR == ', sed_first_row_RN, ' || (', numrangeStr, ')) print }" ')
   } else {
-    unixCmdStr <- paste0("awk -F'", sepz, "' '{ if (NR == 1 || (", numrangeStr, ")) print }' ")
+    unixCmdStr <- paste0("awk -F'", sepz, "' '{ if (NR == ", sed_first_row_RN, " || (", numrangeStr, ")) print }' ")
   }
   #print(unixCmdStr)
   return(unixCmdStr)
