@@ -13,7 +13,6 @@
 #' file <- system.file('extdata', 'test.csv', package = 'bread')
 #' ## Checking the delimiter on the first 12 rows, including headers
 #' bsep(file = file, ntries = 12)
-#' @import dplyr
 #' @export
 
 bsep <- function(file, ntries = 10, separators = c(';', '\t', ' ', '|', ':', ',')){
@@ -34,12 +33,14 @@ bsep <- function(file, ntries = 10, separators = c(';', '\t', ' ', '|', ':', ','
 
   rowz <- system(command = paste0('head -n ', ntries, ' ', qfile), intern = T)
 
-  while(!exists('sep')){
+  while(!exists('local_bread_separator')){
     ## if the number of separators is equal in all the rows and not zero
     ## we have found the separator (probably)
-    count_per_row <- stringr::str_count(string = rowz, pattern = stringr::fixed(separators[ii]))
+    ## here we remove everything but the separator and count what's left
+    ## i miss stringr
+    count_per_row <- nchar(gsub(paste0('[^', separators[ii],']'),'', x = rowz))
     if(length(unique(count_per_row))==1 & unique(count_per_row)[1]!=0){
-      sep <- separators[ii]
+      local_bread_separator <- separators[ii]
       break
     } else {
       ii <-  ii + 1
@@ -49,5 +50,5 @@ bsep <- function(file, ntries = 10, separators = c(';', '\t', ' ', '|', ':', ','
              please add a sep = "..." argument ***')
     }
   }
-return(sep)
+return(local_bread_separator)
 }

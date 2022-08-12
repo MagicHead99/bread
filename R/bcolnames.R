@@ -13,7 +13,6 @@
 #' file <- system.file('extdata', 'test.csv', package = 'bread')
 #' ## Retrieving the column names
 #' bcolnames(file = file)
-#' @import dplyr
 #' @export
 
 bcolnames <- function(file = NULL, ...){
@@ -31,8 +30,8 @@ bcolnames <- function(file = NULL, ...){
   ## in some cases, the first row alone will not be parsed cleanly by colnames()
   unixCmdStr <- paste("head -n 2", qfile)
   args <- c(cmd = unixCmdStr, args)
-  colnames <- do.call(data.table::fread, args) %>%
-    colnames()
+  mini_df <- do.call(data.table::fread, args)
+  colnames <- colnames(mini_df)
 
   return(colnames)
 }

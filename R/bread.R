@@ -63,7 +63,6 @@
 #' bread(file = file, colnames = c('YEAR', 'COLOR'),
 #'       patterns = 'red', filtered_columns = 'COLOR',
 #'       first_row = 10, last_row = 18)
-#' @import dplyr
 #' @export
 
 bread <- function(file = NULL,
@@ -92,6 +91,15 @@ bread <- function(file = NULL,
   }
 
   unixCmdVec <- NULL
+
+  ### 0. check arguments to allow reading the entire file if no other arguments are provided
+  #### formals lists available arguments in a function
+  check_args = formals(bread::bread)
+  #### we want to check if all but 3 that don't matter are NULL
+  check_args = check_args[names(check_args) != "file" & names(check_args) != "fixed" & names(check_args) != "..."]
+  if(!is.null(file) & all(sapply(X = check_args, FUN = is.null))) {
+    first_row <- 1
+  }
 
   ### 1. subset / sed
   if(!is.null(first_row) | !is.null(last_row) | !is.null(head) | !is.null(tail) ){
@@ -211,7 +219,7 @@ bread <- function(file = NULL,
     colnames(df) <- meta_output$colnames
 
     ## filtered_column can be a vector of string colnames or a vector of col indexes
-    ## We prefer names for dplyr::filter()
+    ## We prefer names in order to filter
     if(is.numeric(filtered_columns)){
       filtered_columns <- meta_output$colnames[filtered_columns]
     }
@@ -220,7 +228,7 @@ bread <- function(file = NULL,
             but there might be some false positives. ***")
     } else if(!is.null(filtered_columns) & !is.null(patterns)){
       for(ii in 1:length(filtered_columns)){
-        df <- df %>% filter(stringr::str_detect(!!sym(filtered_columns[ii]), patterns[ii]))
+        df <- df[grepl(pattern = patterns[ii], x = df[[filtered_columns[ii]]]), ]
       }
     }
     return(df)

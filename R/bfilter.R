@@ -31,7 +31,6 @@
 #' ## column as well. The filtered_column argument will just make the script
 #' ## do a second pass with dplyr::filter() to remove false positives.
 #' bfilter(file = file, patterns = '2002', sep = ';')
-#' @import dplyr
 #' @export
 
 
@@ -59,13 +58,13 @@ bfilter <- function(file = NULL,
   }
 
   unixCmdStr <- bfilterStr(file = file, patterns = patterns,
-                           filtered_columns = filtered_columns) %>%
-    paste(qfile)
+                           filtered_columns = filtered_columns)
+  unixCmdStr <- paste(unixCmdStr, qfile)
   args <-  c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
   colnames(df) <- meta_output$colnames
   ## filtered_column can be a vector of string colnames or a vector of col indexes
-  ## We prefer names for dplyr::filter()
+  ## We prefer names in order to filter
   if(is.numeric(filtered_columns)){
     filtered_columns <- meta_output$colnames[filtered_columns]
   }
@@ -74,7 +73,9 @@ bfilter <- function(file = NULL,
             but there might be some false positives. ***")
   } else {
     for(ii in 1:length(filtered_columns)){
-      df <- df %>% filter(stringr::str_detect(!!sym(filtered_columns[ii]), patterns[ii]))
+      ## for historical purposes, tidyversion included
+      #df <- df %>% filter(stringr::str_detect(!!sym(filtered_columns[ii]), patterns[ii]))
+      df <- df[grepl(pattern = patterns[ii], x = df[[filtered_columns[ii]]]), ]
     }
   }
   return(df)
