@@ -27,13 +27,13 @@ bfile_split(
 
 \item{drop_empty_files}{Logical. Defaults to TRUE. Used only with the 'by_column' argument. If changed to FALSE, empty files may be created.}
 
-\item{write_sep}{One character-length string. Will be provided to data.table::fwrite() for writing the output. If not provided, the delimiter will be guessed from the input file with the bsep() function}
+\item{write_sep}{One character-length string. Will be provided to data.table::fwrite() for writing the output. If not provided, the delimiter will be guessed from the input file with the bsep() function. It will override and "sep" argument passed to fread() through "..."}
 
 \item{write_dir}{String. Path to the output directory. By default, it will be the working directory. If the directory doesn"t exist, it will be created.}
 
 \item{meta_output}{List. Optional. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.}
 
-\item{...}{Arguments that must be passed to data.table::fread() like 'sep=' and 'dec='.}
+\item{...}{Arguments that must be passed to data.table::fread() or fwrite() like 'sep=' and 'dec='. Checks for compatibility, but (except for write_sep) you cannot choose to pass an argument to only writing or reading.}
 }
 \value{
 Creates a number of csv files from the original larger file

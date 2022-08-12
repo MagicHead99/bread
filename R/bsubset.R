@@ -23,7 +23,6 @@
 #' ## first_row defaults as 1 and last_row as the last row of the file
 #' bsubset(file = file, first_row = 5)
 #' bsubset(file = file, last_row = 10)
-#' @import dplyr
 #' @export
 
 bsubset <- function(file = NULL,
@@ -47,8 +46,9 @@ bsubset <- function(file = NULL,
 
   unixCmdStr <- bsubsetStr(file = file, head = head, tail = tail,
                            first_row = first_row, last_row = last_row,
-                           ...) %>%
-    paste(qfile)
+                           ...)
+  unixCmdStr <- paste(unixCmdStr, qfile)
+
   args <- c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
   ## sed / awk loses the colnames, we put them back on

@@ -16,7 +16,6 @@
 #' bselect(file = file, colnums = c(1,3))
 #' ## Select the columns named 'PRICE' and 'COLOR'
 #' bselect(file = file, colnames = c('PRICE', 'COLOR'))
-#' @import dplyr
 #' @export
 
 bselect <- function(file = NULL,
@@ -34,8 +33,8 @@ bselect <- function(file = NULL,
 
   unixCmdStr <- bselectStr(file = file,
                            colnames = colnames, colnums = colnums,
-                           ...) %>%
-    paste(qfile)
+                           ...)
+  unixCmdStr <- paste(unixCmdStr, qfile)
   args <- c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
   return(df)

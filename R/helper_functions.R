@@ -2,7 +2,7 @@
 ## internal function to escape special characters
 
 escape_special_characters <- function(string){
-  stringr::str_replace_all(as.character(string), '(\\W)', '\\\\\\1')
+  gsub('(\\W)', '\\\\\\1', x = string)
 }
 
 #* Internal helper function generating the grep Command String
@@ -118,7 +118,7 @@ bnumrangeStr <- function(file = NULL,
     while(!exists('sepz')){
       ## if the number of separators in the header is equal to the number of columns (minus one)
       ## we have found the separator
-      if(stringr::str_count(string = header, pattern = separatorz[ii]) == length(meta_output$colnames) - 1){
+      if(nchar(gsub(paste0('[^', separatorz[ii],']'),'', x = header)) == length(meta_output$colnames) - 1){
         sepz <- separatorz[ii]
         break
       } else {
@@ -207,7 +207,7 @@ bselectStr <- function(file = NULL,
     while(!exists('sepz')){
       ## if the number of separators in the header is equal to the number of columns (minus one)
       ## we have found the separator
-      if(stringr::str_count(string = header, pattern = separatorz[ii]) == length(meta_output$colnames) - 1){
+      if(nchar(gsub(paste0('[^', separatorz[ii],']'),'', x = header)) == length(meta_output$colnames) - 1){
         sepz <- separatorz[ii]
         break
       } else {
@@ -301,9 +301,7 @@ bsubsetStr <- function(file = NULL,
     ### maybe in git / cygwin...
     ### Exceptionnally we"ll use powershell if it"s installed
     if(.Platform$OS.type == 'windows'){
-      if(suppressWarnings(stringr::str_detect(string = system('where tail.exe',
-                                                              intern = T),
-                                              pattern = 'tail.exe'))){
+      if(suppressWarnings(grepl(pattern = 'tail.exe', x = system('where tail.exe', intern = T)))){
         ### if tail.exe is found, simplest solution
         unixCmdStr <- paste0('tail -n ', as.integer(tail))
         ### if not Check env for powershell trace
@@ -352,7 +350,8 @@ addCmdsToPath <- function(){
       output[ii] <- readReg(CMD = CMD[ii], DIR = DIR[ii], output = NA)
     }
 
-    output <- output %>% stats::na.omit() %>% paste(collapse = ';')
+    output <- stats::na.omit(output)
+    output <- paste(output, collapse = ';')
 
     if(output == ''){
       message('### Neither RTools, Git nor Cygwin have been detected.
@@ -367,9 +366,12 @@ readReg <- function(CMD, DIR, output = NA){
   tryCatch(
     {
       # check registry for installPaths, extract it and add subdirectories
-      output <- system(command = CMD, intern = T, ignore.stderr = T) %>%
-        stringr::str_subset(pattern = 'REG_SZ') %>% stringr::str_split(pattern = '  ', simplify = T) %>%
-        last() %>% paste0(DIR)
+      output <- system(command = CMD, intern = T, ignore.stderr = T)
+      output <- output[grepl(pattern = 'REG_SZ', x = output)]
+      output <- strsplit(output, split = '  ')
+      output <- unlist(output)
+      output <- output[length(output)]
+      output <- paste0(output, DIR)
     },
     error=function(cond) {
       output <- NA

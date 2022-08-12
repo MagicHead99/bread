@@ -13,10 +13,10 @@
 #' @param by_nrows Numeric. Number of rows composing the new split files. The last one may be smaller, containing only the remainder.
 #' @param by_columns Vector of strings or numeric. Indicates either the names or index number of the columns whose combinations of unique values will be used to split the files.
 #' @param drop_empty_files Logical. Defaults to TRUE. Used only with the 'by_column' argument. If changed to FALSE, empty files may be created.
-#' @param write_sep One character-length string. Will be provided to data.table::fwrite() for writing the output. If not provided, the delimiter will be guessed from the input file with the bsep() function
+#' @param write_sep One character-length string. Will be provided to data.table::fwrite() for writing the output. If not provided, the delimiter will be guessed from the input file with the bsep() function. It will override and "sep" argument passed to fread() through "..."
 #' @param write_dir String. Path to the output directory. By default, it will be the working directory. If the directory doesn"t exist, it will be created.
 #' @param meta_output List. Optional. Output of the bmeta() function on the same file. It indicates the names and numbers of columns and rows. If not provided, it will be calculated. It can take a while on file with several million rows.
-#' @param ... Arguments that must be passed to data.table::fread() like 'sep=' and 'dec='.
+#' @param ... Arguments that must be passed to data.table::fread() or fwrite() like 'sep=' and 'dec='. Checks for compatibility, but (except for write_sep) you cannot choose to pass an argument to only writing or reading.
 #' @keywords big file split allocate vector size
 #'
 #' @return Creates a number of csv files from the original larger file
@@ -39,7 +39,6 @@
 #' bfile_split(file = file, by_nrows = 5, write_sep = '*')
 #' }
 #' }
-#' @import dplyr
 #' @export
 
 bfile_split <- function(file = NULL,
@@ -49,7 +48,29 @@ bfile_split <- function(file = NULL,
                         write_dir = NULL,
                         meta_output = NULL,
                         ...){
+
+  ## managing arguments
   args = list(...)
+  args = args[(names(args) %in% names(formals(data.table::fread)))]
+  args_w = args[(names(args) %in% names(formals(data.table::fwrite)))]
+  # print(args_w)
+
+  ## output delimiter
+  if(!is.na(write_sep) & nchar(write_sep) > 1){
+    stop(paste('Output delimiter needs to 1 character long: ', write_sep, ' is not correct.'))
+  }
+  if(is.na(write_sep)){
+    args_w[['sep']] <- bsep(file = file)
+  } else {
+    args_w[['sep']] <- write_sep
+  }
+
+  ## input delimiter
+  if(!('sep' %in% names(args))){
+    args[['sep']] <- bsep(file = file)
+  }
+
+
 
   ## Quoting the file to prevent errors due to special characters like ')'
   ## according to environment
@@ -83,13 +104,7 @@ bfile_split <- function(file = NULL,
     print(paste0(meta_output$nrows, ' rows found !'))
   }
 
-  ## output delimiter
-  if(!is.na(write_sep) & nchar(write_sep) > 1){
-    stop(paste('Output delimiter needs to 1 character long: ', write_sep, ' is not correct.'))
-  }
-  if(is.na(write_sep)){
-    write_sep <- bsep(file)
-  }
+
 
   ### 1. Splitting by number of files
   if(!missing(by_nfiles)){
@@ -108,10 +123,11 @@ bfile_split <- function(file = NULL,
     df_temp <- do.call(data.table::fread, args_fread)
 
     #print(paste0('file 1 : ', nrow(df_temp)))
+
     args_fwrite <- c(x = list(df_temp),
-                     file = paste0(base_file, '_', stringr::str_pad(1, n_char_num, pad = '0'), '.csv'),
-                     sep = write_sep,
-                     args)
+                     file = paste0(base_file, '_',
+                                   formatC(x = 1, width = n_char_num, format = 'd', flag = '0'), '.csv'),
+                     args_w)
 
     do.call(data.table::fwrite, args_fwrite)
 
@@ -124,14 +140,15 @@ bfile_split <- function(file = NULL,
                            'd;', (rows_by_chunk_except_last * ii) + 1,'q" ', qfile)
       ##### sed loses the colnames, we must add them back
       args_fread <- c(cmd = unixCmdStr, args)
-      df_temp <- do.call(data.table::fread, args_fread) %>%
-        `colnames<-`(meta_output$colnames)
+      df_temp <- do.call(data.table::fread, args_fread)
+      colnames(df_temp) <- meta_output$colnames
 
       #print(paste0('file ', ii, ' : ' , nrow(df_temp)))
       args_fwrite <- c(x = list(df_temp),
-                       file = paste0(base_file, '_', stringr::str_pad(ii, n_char_num, pad = '0'), '.csv'),
-                       sep = write_sep,
-                       args)
+                       file = paste0(base_file, '_',
+                                     formatC(x = ii, width = n_char_num, format = 'd', flag = '0'), '.csv'),
+                       args_w)
+
       do.call(data.table::fwrite, args_fwrite)
       print(paste0('File ', ii, ' of ',
                    by_nfiles, ' : OK! (', nrow(df_temp),' rows)'))
@@ -143,16 +160,16 @@ bfile_split <- function(file = NULL,
                          ((rows_by_chunk_except_last * (by_nfiles - 1))) + 1,
                          'd;', meta_output$nrows + 1,'q" ', qfile)
     args_fread <- c(cmd = unixCmdStr, args)
-    df_temp <- do.call(data.table::fread, args_fread) %>%
-      `colnames<-`(meta_output$colnames)
+    df_temp <- do.call(data.table::fread, args_fread)
+    colnames(df_temp) <- meta_output$colnames
     #print(paste0('file ', by_nfiles, ' : ' , nrow(df_temp)))
 
     args_fwrite <- c(x = list(df_temp),
                      file = paste0(base_file, '_',
-                                   stringr::str_pad(by_nfiles, n_char_num, pad = '0'),
+                                   formatC(x = by_nfiles, width = n_char_num, format = 'd', flag = '0'),
                                    '.csv'),
-                     sep = write_sep,
-                     args)
+                     args_w)
+    #print(args_fwrite)
     do.call(data.table::fwrite, args_fwrite)
     print(paste0('File ', by_nfiles, ' of ',
                  by_nfiles, ' : OK! (', nrow(df_temp),' rows)'))
@@ -185,16 +202,16 @@ bfile_split <- function(file = NULL,
                         qfile)
     args_fread <- c(cmd = unixCmdStr, args)
     df_temp <- do.call(data.table::fread, args_fread)
-    print(paste0(1, ' - - ', nrow(df_temp)))
+    #print(paste0(1, ' - - ', nrow(df_temp)))
 
     args_fwrite <- c(x = list(df_temp),
                      file = paste0(base_file, '_',
-                                   stringr::str_pad(1, n_char_num, pad = '0'), '.csv'),
-                     sep = write_sep,
-                     args)
+                                   formatC(x = 1, width = n_char_num, format = 'd', flag = '0'), '.csv'),
+                     args_w)
+
     do.call(data.table::fwrite, args_fwrite)
     print(paste0('File ', 1, ' of ',
-                 nfiles, ' : OK!'))
+                 nfiles+1, ' : OK! (', nrow(df_temp) ,' rows)'))
 
 
     #### chunk 2 to n, here the last one is n+1
@@ -204,17 +221,19 @@ bfile_split <- function(file = NULL,
                            'd;', (rows_by_chunk_except_last * ii) + 1,
                            'q" ', qfile)
       args_fread <- c(cmd = unixCmdStr, args)
-      df_temp <- do.call(data.table::fread, args_fread) %>%
-        `colnames<-`(meta_output$colnames)
-      print(paste0(ii, ' - - ', nrow(df_temp)))
+      df_temp <- do.call(data.table::fread, args_fread)
+      colnames(df_temp) <- meta_output$colnames
+      #print(paste0(ii, ' - - ', nrow(df_temp)))
 
       args_fwrite <- c(x = list(df_temp),
-                       file = paste0(base_file, '_', stringr::str_pad(ii, n_char_num, pad = '0'), '.csv'),
-                       sep = write_sep,
-                       args)
+                       file = paste0(base_file, '_',
+                                     formatC(x = ii, width = n_char_num, format = 'd', flag = '0'),
+                                     '.csv'),
+                       args_w)
+
       do.call(data.table::fwrite, args_fwrite)
       print(paste0('File ', ii, ' of ',
-                   nfiles, ' : OK!'))
+                   nfiles+1, ' : OK! (', nrow(df_temp) ,' rows)'))
     }
     #### The remainder can be zero, in that case there is not a n+1th file
     if(last_chunk != 0){
@@ -222,20 +241,22 @@ bfile_split <- function(file = NULL,
                            ((rows_by_chunk_except_last * (nfiles)) + 1), 'd;',
                            meta_output$nrows + 1,'q" ', qfile)
       args_fread <- c(cmd = unixCmdStr, args)
-      df_temp <- do.call(data.table::fread, args_fread) %>%
-        `colnames<-`(meta_output$colnames)
-      print(paste0(nfiles + 1, ' - - ', nrow(df_temp)))
+      df_temp <- do.call(data.table::fread, args_fread)
+      colnames(df_temp) <- meta_output$colnames
+
+      #print(paste0(nfiles + 1, ' - - ', nrow(df_temp)))
 
       args_fwrite <- c(x = list(df_temp),
                        file = paste0(base_file, '_',
-                                     stringr::str_pad((nfiles + 1), n_char_num, pad = '0'), '.csv'),
-                       sep = write_sep,
-                       args)
+                                     formatC(x = (nfiles + 1), width = n_char_num, format = 'd', flag = '0'),
+                                     '.csv'),
+                       args_w)
+      # print(args_fwrite)
       do.call(data.table::fwrite, args_fwrite)
       print(paste0('File ', nfiles, ' of ',
-                   nfiles, ' : OK!'))
+                   nfiles+1, ' : OK! (', nrow(df_temp) ,' rows)'))
     } else {
-      print('All done! Last file would in fact have zero rows.')
+      print('All done! Last file would in fact have had zero rows.')
     }
   }
 
@@ -255,15 +276,16 @@ bfile_split <- function(file = NULL,
     #### building the unix str
     unixCmdStr <- bselectStr(file = file,
                              colnums = colnums,
-                             ...) %>%
-      paste(qfile)
+                             ...)
+    unixCmdStr <- paste(unixCmdStr, qfile)
 
     #### we load only the columns we need to identify the unique values then
     #### find all combinations to later apply filters
     args_fread <- c(cmd = unixCmdStr, args)
-    unique_values_for_split <- do.call(data.table::fread, args_fread) %>%
-      lapply(FUN = unique) %>%
-      expand.grid(stringsAsFactors = F)
+    columns_for_split <- do.call(data.table::fread, args_fread)
+    unique_values_for_split <- lapply(columns_for_split, FUN = unique)
+    unique_values_for_split <- expand.grid(unique_values_for_split, stringsAsFactors = F)
+
     #### number of combos = number of files
     nfiles <- nrow(unique_values_for_split)
 
@@ -298,8 +320,8 @@ bfile_split <- function(file = NULL,
       if(nrow(df_temp) > 0 | drop_empty_files == F){
         args_fwrite <- c(x = list(df_temp),
                          file = paste0(base_file, '_', file_ext, '.csv'),
-                         sep = write_sep,
-                         args)
+                         args_w)
+        # print(args_fwrite)
         do.call(data.table::fwrite, args_fwrite)
         print(paste0('File ', ii, ' of ',
                      nfiles, ' : OK!'))

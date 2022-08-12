@@ -12,7 +12,6 @@
 #' file <- system.file('extdata', 'test.csv', package = 'bread')
 #' ## Counting rows (almost like the band)
 #' bnrow(file = file)
-#' @import dplyr
 #' @export
 
 
@@ -26,7 +25,9 @@ bnrow <- function(file = NULL){
     qfile <- shQuote(file)
   }
 
-  nrows <- system(paste0('wc -l ', qfile), intern = TRUE) %>%
-    stringr::str_remove(pattern = ' .*$') %>% as.numeric() %>% -1 ## -1 because headers
+  nrows <- system(paste0('wc -l ', qfile), intern = TRUE)
+  nrows <- gsub(pattern = ' .*$', replacement = '', x = nrows)
+  nrows <- as.numeric(nrows) - 1L ## -1 because headers
+
   return(nrows)
   }

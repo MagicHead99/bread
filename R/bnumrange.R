@@ -28,7 +28,6 @@
 #' bnumrange(file = file, range_min = c(2000, 1500), range_max = c(2005, 1990),
 #'       numrange_columns = c('YEAR', 'PRICE'), sep = ';')
 #'
-#' @import dplyr
 #' @export
 
 
@@ -38,7 +37,7 @@ bnumrange <- function(file = NULL,
                     ...){
 
   ###
-  # fread(cmd='awk -F; "{ if (NR == 1 || ($1 >= 2006 && $3 > 2000)) print }" C:/Users/Vz/Documents/R/win-library/4.0/bread/extdata/test.csv')
+  # fread(cmd='awk -F; "{ if (NR == 1 || ($1 >= 2006 && $3 > 2000)) print }" C:/Users/xx/Documents/R/win-library/4.0/bread/extdata/test.csv')
 
   args <- list(...)
 
@@ -55,8 +54,8 @@ bnumrange <- function(file = NULL,
 
   unixCmdStr <- bnumrangeStr(file = file,
                              range_min = range_min, range_max = range_max,
-                             numrange_columns = numrange_columns) %>%
-    paste(qfile)
+                             numrange_columns = numrange_columns)
+  unixCmdStr <- paste(unixCmdStr, qfile)
   #print(unixCmdStr)
   args <-  c(cmd = unixCmdStr, args)
   df <- do.call(data.table::fread, args)
