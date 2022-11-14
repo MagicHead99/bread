@@ -97,7 +97,7 @@ bread <- function(file = NULL,
   check_args = formals(bread::bread)
   #### we want to check if all but 3 that don't matter are NULL
   check_args = check_args[names(check_args) != "file" & names(check_args) != "fixed" & names(check_args) != "..."]
-  if(!is.null(file) & all(sapply(X = check_args, FUN = is.null))) {
+  if(!is.null(file) & all(sapply(X = names(check_args), FUN = function(arg){eval.parent(call('is.null', as.name(arg)), n=3)}))) {
     first_row <- 1
   }
 
@@ -188,7 +188,8 @@ bread <- function(file = NULL,
     unixCmdVec <- append(unixCmdVec,
                          bfilterStr(file = file,
                                     patterns = patterns,
-                                    filtered_columns = filtered_columns))
+                                    filtered_columns = filtered_columns,
+                                    fixed = fixed))
   }
 
   ### 4. filter by value / awk

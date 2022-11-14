@@ -20,7 +20,8 @@ escape_special_characters <- function(string){
 
 bfilterStr <- function(file = NULL,
                        patterns = NULL,
-                       filtered_columns = NULL){
+                       filtered_columns = NULL,
+                       fixed = FALSE){
 
   if((length(patterns) != length(filtered_columns)) & !is.null(filtered_columns)){
     stop("\n *** patterns must correspond to the filtered_columns (vectors of \n
@@ -28,6 +29,12 @@ bfilterStr <- function(file = NULL,
     please use regexp 'or' = '|' ***")
   }
 
+  ##grep searches a whole row, it can't use regex to search for beginning or end of string in a middle column
+  ##this will be done on the second pass with the data.table filter on the filtered_column instead
+  if(fixed == FALSE){
+    patterns <- gsub('^\\^', '', patterns)
+    patterns <- gsub('\\$$', '', patterns)
+  }
   filterStr <- paste(patterns, collapse = '|')
   unixCmdStr <- paste0('grep -aE "', filterStr, '" ')
   return(unixCmdStr)
@@ -301,7 +308,7 @@ bsubsetStr <- function(file = NULL,
     ### maybe in git / cygwin...
     ### Exceptionnally we"ll use powershell if it"s installed
     if(.Platform$OS.type == 'windows'){
-      if(suppressWarnings(grepl(pattern = 'tail.exe', x = system('where tail.exe', intern = T)))){
+      if(suppressWarnings(grepl(pattern = 'tail.exe', x = system('where tail.exe', intern = T)))[1]){
         ### if tail.exe is found, simplest solution
         unixCmdStr <- paste0('tail -n ', as.integer(tail))
         ### if not Check env for powershell trace
