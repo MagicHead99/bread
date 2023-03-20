@@ -18,17 +18,25 @@
 bcolnames <- function(file = NULL, ...){
   args <- list(...)
 
+  ## Getting full path, in case the file is in the wd
+  file <- normalizePath(path = file)
+  if(startsWith(file, "\\")){
+    file <- gsub(pattern = "\\\\", replacement = "/", x = file)
+  }
   ## Quoting the file to prevent errors due to special characters like ')'
   ## according to environment
   if(.Platform$OS.type == 'windows'){
     qfile <- shQuote(file, type = 'cmd2')
+    ## More quoting to manage filepaths with spaces
+    qfile <- paste0('\'', qfile, '\'')
   } else if(.Platform$OS.type == 'unix'){
     qfile <- shQuote(file)
   }
 
+
   ## We get the 2 first rows - which is not much slower than one row - because
   ## in some cases, the first row alone will not be parsed cleanly by colnames()
-  unixCmdStr <- paste("head -n 2", qfile)
+  unixCmdStr <- paste0('head -n 2 ', qfile)
   args <- c(cmd = unixCmdStr, args)
   mini_df <- do.call(data.table::fread, args)
   colnames <- colnames(mini_df)

@@ -1,6 +1,7 @@
 
 ## internal function to escape special characters
 
+
 escape_special_characters <- function(string){
   gsub('(\\W)', '\\\\\\1', x = string)
 }
@@ -111,31 +112,7 @@ bnumrangeStr <- function(file = NULL,
   if('sep' %in% names(args)){
     sepz = args[['sep']]
   } else {
-    ii <- 1
-    ## classic separators : if it"s not one of those, the user will have to set it
-    separatorz <- c(',',';','\t', ' ', '|', ':')
-    ## Quoting the file to prevent errors due to special characters like ')'
-    ## according to environment
-    if(.Platform$OS.type == 'windows'){
-      qfile <- shQuote(file, type = 'cmd2')
-    } else if(.Platform$OS.type == 'unix'){
-      qfile <- shQuote(file)
-    }
-    header <- system(command = paste('head -n 1 ', qfile), intern = T)
-    while(!exists('sepz')){
-      ## if the number of separators in the header is equal to the number of columns (minus one)
-      ## we have found the separator
-      if(nchar(gsub(paste0('[^', separatorz[ii],']'),'', x = header)) == length(meta_output$colnames) - 1){
-        sepz <- separatorz[ii]
-        break
-      } else {
-        ii <-  ii + 1
-      }
-      if(ii > length(separatorz)){
-        stop('*** ERROR: We are having trouble determining the separator,
-             please add a sep = "..." argument ***')
-      }
-    }
+    sepz <- bread::bsep(file)
   }
 
   ### win
@@ -200,37 +177,12 @@ bselectStr <- function(file = NULL,
   if('sep' %in% names(args)){
     sepz = args[['sep']]
   } else {
-    ii <- 1
-    ## classic separators : if it"s not one of those, the user will have to set it
-    separatorz <- c(',',';','\t', ' ', '|', ':')
-    ## Quoting the file to prevent errors due to special characters like ')'
-    ## according to environment
-    if(.Platform$OS.type == 'windows'){
-      qfile <- shQuote(file, type = 'cmd2')
-    } else if(.Platform$OS.type == 'unix'){
-      qfile <- shQuote(file)
-    }
-    header <- system(command = paste('head -n 1 ', qfile), intern = T)
-    while(!exists('sepz')){
-      ## if the number of separators in the header is equal to the number of columns (minus one)
-      ## we have found the separator
-      if(nchar(gsub(paste0('[^', separatorz[ii],']'),'', x = header)) == length(meta_output$colnames) - 1){
-        sepz <- separatorz[ii]
-        break
-      } else {
-        ii <-  ii + 1
-      }
-      if(ii > length(separatorz)){
-        stop('*** ERROR: We are having trouble determining the separator,
-             please add a sep = "..." argument ***')
-      }
-    }
+    sepz <- bread::bsep(file)
   }
 
   unixCmdStr <- paste0('cut -d"', sepz,'" -f', colnumStr, ' ')
   return(unixCmdStr)
 }
-
 
 #* Internal helper function generating the sed/awk Command String
 #*
@@ -297,8 +249,6 @@ bsubsetStr <- function(file = NULL,
       }
     }
 
-
-
     ### 2nd case, head is provided
   } else if(!is.null(head)){
     unixCmdStr <- paste0('head -n ', as.integer(head + 1), ' ')
@@ -322,7 +272,6 @@ bsubsetStr <- function(file = NULL,
         unixCmdStr <- paste0('sed -e :a -e "$q;N;', as.integer(tail + 1),',$D;ba" ')
       }
 
-
     } else {
       ### if unix, tail should be installed hopefully
       unixCmdStr <- paste0('tail -n ', as.integer(tail))
@@ -332,14 +281,14 @@ bsubsetStr <- function(file = NULL,
   return(unixCmdStr)
 }
 
+
+##
 addCmdsToPath <- function(){
 
   ### If BDF Environment...
   if(Sys.getenv('BDF_OSVER') != '' & .Platform$OS.type == 'windows'){
     oldPath <- Sys.getenv('PATH')
     Sys.setenv(PATH = paste(oldPath, 'C:\\Program Files\\Git\\usr\\bin;C:\\Produits\\R\\Rtools\\usr\\bin', sep = ';'))
-
-
 
   } else if(.Platform$OS.type == 'windows'){
     oldPath <- Sys.getenv('PATH')
@@ -369,6 +318,7 @@ addCmdsToPath <- function(){
   }
 }
 
+##
 readReg <- function(CMD, DIR, output = NA){
   tryCatch(
     {
