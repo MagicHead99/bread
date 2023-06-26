@@ -17,15 +17,17 @@
 
 bnrow <- function(file = NULL){
 
-  ## Quoting the file to prevent errors due to special characters like ')'
-  ## according to environment
-  if(.Platform$OS.type == 'windows'){
-    qfile <- shQuote(file, type = 'cmd2')
-  } else if(.Platform$OS.type == 'unix'){
-    qfile <- shQuote(file)
+  if(grepl(pattern = "\\'", file) == T){
+    stop("### Can't parse because filename contains the character \"'\".")
   }
 
-  nrows <- system(paste0('wc -l ', qfile), intern = TRUE)
+  ## Getting full path, in case the file is in the wd
+  file <- normalizePath(path = file)
+  if(startsWith(file, "\\")){
+    file <- gsub(pattern = "\\\\", replacement = "/", x = file)
+  }
+
+  nrows <- system(paste0('wc -l \'', file, '\''), intern = TRUE)
   nrows <- gsub(pattern = ' .*$', replacement = '', x = nrows)
   nrows <- as.numeric(nrows) - 1L ## -1 because headers
 

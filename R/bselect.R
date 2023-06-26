@@ -23,10 +23,17 @@ bselect <- function(file = NULL,
                     ...){
   args <- list(...)
 
+  ## Getting full path, in case the file is in the wd
+  file <- normalizePath(path = file)
+  if(startsWith(file, "\\")){
+    file <- gsub(pattern = "\\\\", replacement = "/", x = file)
+  }
   ## Quoting the file to prevent errors due to special characters like ')'
   ## according to environment
   if(.Platform$OS.type == 'windows'){
     qfile <- shQuote(file, type = 'cmd2')
+    ## More quoting to manage filepaths with spaces
+    qfile <- paste0('\'', qfile, '\'')
   } else if(.Platform$OS.type == 'unix'){
     qfile <- shQuote(file)
   }
