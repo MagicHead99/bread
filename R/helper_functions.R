@@ -1,4 +1,3 @@
-
 ## internal function to escape special characters
 
 
@@ -310,7 +309,7 @@ addCmdsToPath <- function(){
     output <- paste(output, collapse = ';')
 
     if(output == ''){
-      message('### Neither RTools, Git nor Cygwin have been detected.
+      packageStartupMessage('### Neither RTools, Git nor Cygwin have been detected.
 ### Please make sure you have another source for the necessary Unix cmds
 ### in your PATH.')
     }
